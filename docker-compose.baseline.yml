@@ -1,0 +1,74 @@
+# Baseline: 1 instance per service, single DB, FT_MODE=off, no restart policies.
+name: uni-baseline
+
+x-service: &service
+  build: ./services
+  init: true  # same crash method as FT (kill -9 of the app process); still no restart policy
+  labels: {node: b}  # baseline = one server node; node_failure stops all of it
+  environment:
+    FT_MODE: "off"
+    DATABASE_URL: postgresql://uni:uni@postgres-primary:5432/uni
+  depends_on:
+    postgres-primary:
+      condition: service_healthy
+
+services:
+  postgres-primary:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: uni
+      POSTGRES_PASSWORD: uni
+      POSTGRES_DB: uni
+    labels: {node: b}
+    volumes:
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "uni"]
+      interval: 2s
+      retries: 30
+
+  student-service:
+    <<: *service
+    command: uvicorn student:app --host 0.0.0.0 --port 8000
+
+  transcript-service:
+    <<: *service
+    command: uvicorn transcript:app --host 0.0.0.0 --port 8000
+
+  payment-service:
+    <<: *service
+    command: uvicorn payment:app --host 0.0.0.0 --port 8000
+
+  mock-bank:
+    build: ./services
+    command: uvicorn mockbank:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8090:8000"
+
+  gateway:
+    image: nginx:1.27-alpine
+    volumes:
+      - ./gateway/nginx.baseline.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - "8080:80"
+    depends_on: [student-service, transcript-service, payment-service]
+
+  monitor:  # measurement tool, not part of the system under test, so it may restart
+    build: ./services
+    restart: unless-stopped
+    command: python monitor.py
+    environment:
+      MONITOR_OUT: /results/${MONITOR_FILE:-monitor_baseline.csv}
+      MONITOR_TARGETS: >-
+        student=http://student-service:8000,transcript=http://transcript-service:8000,payment=http://payment-service:8000,mock-bank=http://mock-bank:8000
+    volumes:
+      - ./results:/results
+
+  # Load generator, run on demand: docker compose -f ... run --rm workload
+  workload:
+    build: ./services
+    profiles: ["tools"]
+    volumes:
+      - ./experiments:/exp
+      - ./results:/results
+    command: python /exp/workload.py

@@ -1,0 +1,29 @@
+skip app_crash_baseline (already in /Users/shapok/Desktop/ftrmidka/results/experiments.csv)
+skip app_crash_ft (already in /Users/shapok/Desktop/ftrmidka/results/experiments.csv)
+skip db_failure_baseline (already in /Users/shapok/Desktop/ftrmidka/results/experiments.csv)
+skip db_failure_ft (already in /Users/shapok/Desktop/ftrmidka/results/experiments.csv)
+skip network_timeout_baseline (already in /Users/shapok/Desktop/ftrmidka/results/experiments.csv)
+skip network_timeout_ft (already in /Users/shapok/Desktop/ftrmidka/results/experiments.csv)
+skip node_failure_baseline (already in /Users/shapok/Desktop/ftrmidka/results/experiments.csv)
+skip node_failure_ft (already in /Users/shapok/Desktop/ftrmidka/results/experiments.csv)
+skip lost_transaction_baseline (already in /Users/shapok/Desktop/ftrmidka/results/experiments.csv)
+skip lost_transaction_ft (already in /Users/shapok/Desktop/ftrmidka/results/experiments.csv)
+skip high_load_baseline (already in /Users/shapok/Desktop/ftrmidka/results/experiments.csv)
+skip high_load_ft (already in /Users/shapok/Desktop/ftrmidka/results/experiments.csv)
+
+wrote /Users/shapok/Desktop/ftrmidka/results/experiments.csv
+skip soak baseline (already in /Users/shapok/Desktop/ftrmidka/results/soak_summary.csv)
+
+=== soak ft
+t=98s inject app_crash
+t=233s inject db_failure
+t=336s inject app_crash
+t=467s inject lost_transaction
+t=562s inject node_failure
+t=654s inject app_crash
+t=757s inject lost_transaction
+t=883s inject lost_transaction
+t=985s inject lost_transaction
+t=1100s inject node_failure
+ALL             24000    97.3      5.9     50.1
+{'mode': 'ft', 'minutes': 20, 'failures': 10, 'total': 24000, 'successful': 23348, 'failed': 652, 'recovered': 6, 'availability': 0.9728, 'consistency': 'PASS', 'consistency_reason': 'all checks passed'}

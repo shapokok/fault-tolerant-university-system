@@ -1,0 +1,43 @@
+ts,target,state,detail
+1791210735.906,student-1,down,ConnectError
+1791210735.906,student-2,down,ConnectError
+1791210735.906,transcript-1,down,ConnectError
+1791210735.906,transcript-2,down,ConnectError
+1791210735.906,payment-1,down,ConnectError
+1791210735.906,payment-2,down,ConnectError
+1791210735.906,mock-bank,down,ConnectError
+1791210737.424,mock-bank,up,
+1791210739.935,student-1,up,
+1791210739.935,transcript-2,degraded,student-service down
+1791210740.436,student-2,up,
+1791210740.436,transcript-1,degraded,student-service down
+1791210740.436,payment-1,up,
+1791210740.436,payment-2,up,
+1791210741.493,transcript-1,up,
+1791210741.493,transcript-2,up,
+1791210760.236,payment-1,degraded,ready ConnectError
+1791210760.738,payment-1,up,
+1791210809.325,student-1,degraded,db on replica
+1791210809.325,student-2,degraded,db on replica
+1791210809.325,transcript-1,degraded,db on replica
+1791210809.325,transcript-2,degraded,db on replica
+1791210809.325,payment-1,degraded,db on replica
+1791210809.325,payment-2,degraded,db on replica
+1791210840.135,student-1,up,
+1791210840.135,student-2,up,
+1791210840.135,transcript-1,up,
+1791210840.135,transcript-2,up,
+1791210840.135,payment-1,up,
+1791210840.135,payment-2,up,
+1791210860.078,payment-2,degraded,breaker mock-bank open
+1791210861.09,payment-1,degraded,breaker mock-bank open
+1791210891.648,payment-1,up,
+1791210891.648,payment-2,up,
+1791210911.014,student-1,down,ConnectError
+1791210911.014,student-2,down,RemoteProtocolError
+1791210911.014,transcript-1,down,ConnectError
+1791210911.014,transcript-2,down,ConnectError
+1791210911.014,payment-1,degraded,ready ConnectError
+1791210911.014,payment-2,down,RemoteProtocolError
+1791210911.014,mock-bank,down,ConnectError
+1791210911.519,payment-1,down,ConnectError

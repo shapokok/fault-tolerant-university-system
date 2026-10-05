@@ -1,0 +1,138 @@
+# Fault-tolerant: 2 instances per service behind nginx, primary + streaming replica,
+# restart policies and healthchecks, scheduled backups, FT_MODE=on.
+# "Node" = group of containers. Label node=b marks node-b; stop it with:
+#   docker stop $(docker ps -q --filter label=node=b)
+name: uni-ft
+
+x-app: &app
+  build: ./services
+  restart: unless-stopped
+  init: true  # tini is PID 1, so killing the app process is a real crash that the restart policy handles
+  environment:
+    FT_MODE: "on"
+    DATABASE_URL: postgresql://uni:uni@postgres-primary:5432/uni
+    REPLICA_URL: postgresql://uni:uni@postgres-replica:5432/uni
+    STUDENT_URL: http://gateway  # transcript reaches student-service through the load balancer
+  healthcheck:
+    test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=2)"]
+    interval: 2s
+    timeout: 2s
+    retries: 3
+  depends_on:
+    postgres-primary:
+      condition: service_healthy
+
+x-postgres: &postgres
+  image: postgres:16
+  restart: unless-stopped
+  environment:
+    POSTGRES_USER: uni
+    POSTGRES_PASSWORD: uni
+    POSTGRES_DB: uni
+  healthcheck:
+    test: ["CMD", "pg_isready", "-U", "uni"]
+    interval: 2s
+    retries: 30
+
+services:
+  # ---------- node-a ----------
+  postgres-primary:
+    <<: *postgres
+    labels: {node: a}
+    volumes:
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+
+  student-service-1:
+    <<: *app
+    labels: {node: a}
+    command: uvicorn student:app --host 0.0.0.0 --port 8000
+
+  transcript-service-1:
+    <<: *app
+    labels: {node: a}
+    command: uvicorn transcript:app --host 0.0.0.0 --port 8000
+
+  payment-service-1:
+    <<: *app
+    labels: {node: a}
+    command: uvicorn payment:app --host 0.0.0.0 --port 8000
+
+  gateway:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    labels: {node: a}
+    volumes:
+      - ./gateway/nginx.ft.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - "8080:80"
+
+  monitor:
+    build: ./services
+    restart: unless-stopped
+    labels: {node: a}
+    command: python monitor.py
+    environment:
+      MONITOR_OUT: /results/${MONITOR_FILE:-monitor_ft.csv}
+      MONITOR_TARGETS: >-
+        student-1=http://student-service-1:8000,student-2=http://student-service-2:8000,transcript-1=http://transcript-service-1:8000,transcript-2=http://transcript-service-2:8000,payment-1=http://payment-service-1:8000,payment-2=http://payment-service-2:8000,mock-bank=http://mock-bank:8000
+    volumes:
+      - ./results:/results
+
+  backup:
+    image: postgres:16
+    restart: unless-stopped
+    labels: {node: a}
+    environment:
+      PGPASSWORD: uni
+      BACKUP_INTERVAL_S: 60
+      BACKUP_KEEP: 10
+    entrypoint: ["bash", "/infra/backup.sh"]
+    volumes:
+      - ./infra:/infra:ro
+      - ./backups:/backups
+    depends_on:
+      postgres-primary:
+        condition: service_healthy
+
+  # ---------- node-b ----------
+  postgres-replica:
+    <<: *postgres
+    labels: {node: b}
+    user: postgres
+    entrypoint: ["bash", "/infra/replica-entrypoint.sh"]
+    volumes:
+      - ./infra:/infra:ro
+    depends_on:
+      postgres-primary:
+        condition: service_healthy
+
+  student-service-2:
+    <<: *app
+    labels: {node: b}
+    command: uvicorn student:app --host 0.0.0.0 --port 8000
+
+  transcript-service-2:
+    <<: *app
+    labels: {node: b}
+    command: uvicorn transcript:app --host 0.0.0.0 --port 8000
+
+  payment-service-2:
+    <<: *app
+    labels: {node: b}
+    command: uvicorn payment:app --host 0.0.0.0 --port 8000
+
+  # ---------- external ----------
+  mock-bank:
+    build: ./services
+    restart: unless-stopped
+    command: uvicorn mockbank:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8090:8000"
+
+  workload:
+    build: ./services
+    profiles: ["tools"]
+    volumes:
+      - ./experiments:/exp
+      - ./results:/results
+    command: python /exp/workload.py

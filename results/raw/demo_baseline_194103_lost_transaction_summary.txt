@@ -1,0 +1,11 @@
+ Container uni-baseline-workload-run-1b2483c3187e Creating 
+ Container uni-baseline-workload-run-1b2483c3187e Created 
+workload started 1791211427.769
+wrote 900 rows to /results/raw/demo_baseline_194103_lost_transaction.csv
+endpoint        total    ok %   p50 ms   p95 ms
+timetable         355   100.0      5.0      8.6
+student           173   100.0      4.6      8.9
+payment           188    32.4     23.1     40.3
+registration       93   100.0      5.9      9.5
+transcript         91   100.0     19.6     27.1
+ALL               900    85.9      5.8     28.0

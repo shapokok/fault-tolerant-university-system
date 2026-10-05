@@ -1,0 +1,11 @@
+ Container uni-baseline-workload-run-5d5303d98f22 Creating 
+ Container uni-baseline-workload-run-5d5303d98f22 Created 
+workload started 1791211361.757
+wrote 900 rows to /results/raw/demo_baseline_194103_db_failure.csv
+endpoint        total    ok %   p50 ms   p95 ms
+timetable         380    29.5     10.2     26.5
+student           175    33.1      9.7     23.0
+payment           176    33.5     17.3     32.9
+registration       88    33.0     10.2     23.3
+transcript         81    33.3     24.3     44.7
+ALL               900    31.7     11.4     31.4

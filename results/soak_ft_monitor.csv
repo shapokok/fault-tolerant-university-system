@@ -1,0 +1,140 @@
+ts,target,state,detail
+1791209053.728,student-1,down,ConnectTimeout
+1791209053.728,student-2,down,ConnectTimeout
+1791209053.728,transcript-1,down,ConnectTimeout
+1791209053.728,transcript-2,down,ConnectTimeout
+1791209053.728,payment-1,down,ConnectTimeout
+1791209053.728,payment-2,down,ConnectError
+1791209053.728,mock-bank,down,ConnectError
+1791209054.23,mock-bank,up,
+1791209056.738,student-1,up,
+1791209056.738,student-2,up,
+1791209056.738,transcript-1,degraded,student-service down
+1791209056.738,transcript-2,degraded,student-service down
+1791209056.738,payment-1,up,
+1791209056.738,payment-2,up,
+1791209060.755,transcript-1,up,
+1791209060.755,transcript-2,up,
+1791209170.364,payment-1,down,ConnectError
+1791209170.866,payment-1,up,
+1791209304.8,student-1,degraded,ready ReadTimeout
+1791209304.8,student-2,degraded,ready ReadTimeout
+1791209304.8,transcript-1,degraded,ready ReadTimeout
+1791209304.8,transcript-2,degraded,ready ReadTimeout
+1791209304.8,payment-1,degraded,ready ReadTimeout
+1791209304.8,payment-2,degraded,ready ReadTimeout
+1791209308.865,student-2,down,ReadTimeout
+1791209308.865,payment-2,down,ReadTimeout
+1791209309.554,student-2,degraded,db on replica
+1791209309.554,payment-2,degraded,db on replica
+1791209335.39,student-1,up,
+1791209335.39,student-2,up,
+1791209335.39,transcript-1,up,
+1791209335.39,transcript-2,up,
+1791209335.39,payment-1,up,
+1791209335.39,payment-2,up,
+1791209408.391,payment-1,down,ConnectError
+1791209409.394,payment-1,up,
+1791209541.135,payment-1,degraded,breaker mock-bank open
+1791209542.643,payment-2,degraded,breaker mock-bank open
+1791209572.147,payment-1,up,
+1791209573.174,payment-2,up,
+1791209585.492,payment-1,degraded,ready ReadTimeout
+1791209586.193,transcript-1,degraded,ready ReadTimeout
+1791209586.193,payment-1,up,
+1791209586.876,transcript-1,up,
+1791209587.938,transcript-1,degraded,ready ReadTimeout
+1791209587.938,payment-2,degraded,ready ReadTimeout
+1791209588.505,transcript-1,up,
+1791209588.505,payment-2,up,
+1791209589.23,transcript-1,degraded,ready ReadTimeout
+1791209589.23,transcript-2,degraded,ready ReadTimeout
+1791209589.23,payment-1,degraded,ready ReadTimeout
+1791209589.23,payment-2,degraded,ready ReadTimeout
+1791209590.117,transcript-2,up,
+1791209590.117,payment-1,up,
+1791209590.117,payment-2,up,
+1791209590.86,transcript-1,up,
+1791209591.415,transcript-1,degraded,ready ReadTimeout
+1791209591.415,transcript-2,degraded,ready ReadTimeout
+1791209592.151,transcript-1,up,
+1791209592.151,transcript-2,up,
+1791209593.392,transcript-2,degraded,ready ReadTimeout
+1791209594.016,transcript-2,up,
+1791209595.63,transcript-1,degraded,ready ReadTimeout
+1791209595.63,transcript-2,degraded,ready ReadTimeout
+1791209596.217,transcript-1,up,
+1791209596.217,transcript-2,up,
+1791209597.254,transcript-2,degraded,ready ReadTimeout
+1791209597.254,payment-1,degraded,ready ReadTimeout
+1791209597.254,payment-2,degraded,ready ReadTimeout
+1791209598.081,transcript-2,up,
+1791209598.081,payment-1,up,
+1791209598.081,payment-2,up,
+1791209598.588,transcript-1,degraded,ready ReadTimeout
+1791209598.588,transcript-2,degraded,ready ReadTimeout
+1791209599.103,transcript-1,up,
+1791209599.103,transcript-2,up,
+1791209600.136,transcript-1,degraded,ready ReadTimeout
+1791209600.692,transcript-1,up,
+1791209600.692,transcript-2,degraded,ready ReadTimeout
+1791209601.337,transcript-2,up,
+1791209603.012,transcript-2,degraded,ready ReadTimeout
+1791209604.081,transcript-1,degraded,student-service down
+1791209604.081,payment-2,degraded,ready ReadTimeout
+1791209605.028,transcript-1,up,
+1791209605.028,payment-2,up,
+1791209606.293,transcript-1,degraded,ready ReadTimeout
+1791209606.293,transcript-2,up,
+1791209606.928,transcript-1,up,
+1791209607.455,transcript-2,degraded,ready ReadTimeout
+1791209608.058,transcript-2,up,
+1791209609.655,transcript-1,degraded,ready ReadTimeout
+1791209609.655,payment-2,degraded,ready ReadTimeout
+1791209610.41,transcript-1,up,
+1791209610.41,payment-2,up,
+1791209610.936,transcript-1,degraded,ready ReadTimeout
+1791209610.936,payment-2,degraded,ready ReadTimeout
+1791209611.654,transcript-2,degraded,ready ReadTimeout
+1791209611.654,payment-2,up,
+1791209612.208,transcript-1,up,
+1791209613.127,transcript-2,up,
+1791209613.676,transcript-2,degraded,student-service down
+1791209614.753,payment-2,degraded,ready ReadTimeout
+1791209615.422,payment-2,up,
+1791209616.133,transcript-2,up,
+1791209634.387,student-2,down,ConnectError
+1791209634.387,transcript-1,degraded,student-service down
+1791209634.387,transcript-2,down,ConnectError
+1791209634.387,payment-2,down,ConnectError
+1791209634.891,transcript-1,up,
+1791209665.569,transcript-2,up,
+1791209666.07,student-2,up,
+1791209666.07,payment-2,up,
+1791209726.344,payment-1,down,ConnectError
+1791209727.357,payment-1,up,
+1791209831.944,payment-2,degraded,breaker mock-bank open
+1791209832.447,payment-1,degraded,breaker mock-bank open
+1791209863.065,payment-2,up,
+1791209863.566,payment-1,up,
+1791209957.094,payment-1,degraded,breaker mock-bank open
+1791209957.094,payment-2,degraded,breaker mock-bank open
+1791209989.009,payment-2,up,
+1791209989.51,payment-1,up,
+1791210059.786,payment-1,degraded,breaker mock-bank open
+1791210059.786,payment-2,degraded,breaker mock-bank open
+1791210089.663,payment-2,up,
+1791210090.165,payment-1,up,
+1791210172.595,student-2,down,ConnectError
+1791210172.595,transcript-2,down,ConnectTimeout
+1791210172.595,payment-2,down,ConnectError
+1791210204.781,student-2,up,
+1791210204.781,transcript-2,up,
+1791210205.282,payment-2,up,
+1791210280.221,student-1,down,ConnectError
+1791210280.221,student-2,down,ConnectError
+1791210280.221,transcript-1,down,ConnectError
+1791210280.221,transcript-2,down,ConnectError
+1791210280.221,payment-1,down,ConnectError
+1791210280.221,payment-2,down,ConnectError
+1791210280.221,mock-bank,down,ConnectError

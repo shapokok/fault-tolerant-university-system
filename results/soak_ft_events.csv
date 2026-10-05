@@ -1,0 +1,11 @@
+ts,t_s,scenario
+1791209170.124,98.4,app_crash
+1791209304.615,232.9,db_failure
+1791209408.012,336.2,app_crash
+1791209538.699,466.9,lost_transaction
+1791209633.917,562.2,node_failure
+1791209725.83,654.1,app_crash
+1791209828.929,757.2,lost_transaction
+1791209955.066,883.3,lost_transaction
+1791210056.943,985.2,lost_transaction
+1791210172.136,1100.4,node_failure
