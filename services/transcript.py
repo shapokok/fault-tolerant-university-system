@@ -3,6 +3,7 @@
 Also batch generation for all students, with checkpoints in FT mode.
 """
 import asyncio
+import logging
 import os
 
 import httpx
@@ -10,6 +11,7 @@ from fastapi import HTTPException
 
 import common
 import ft
+import obs
 
 STUDENT_URL = os.getenv("STUDENT_URL", "http://student-service:8000")
 CHECKPOINT_EVERY = 10   # students per checkpoint
@@ -90,7 +92,7 @@ async def save(job_id, done, last_sid, finished=False):
 async def run_job(job_id):
     # FT: continue after the last checkpoint. Baseline: always from the start.
     start = await common.fetchval("SELECT last_student_id FROM transcript_jobs WHERE id = $1", job_id)
-    print(f"job {job_id}: starting after student {start}", flush=True)
+    obs.log("batch_start", f"job {job_id}: starting after student {start}", job_id=job_id)
     ids = [r["id"] for r in await common.fetch("SELECT id FROM students WHERE id > $1 ORDER BY id", start)]
     done = []
     for sid in ids:
@@ -99,10 +101,10 @@ async def run_job(job_id):
         await asyncio.sleep(STEP_DELAY_S)
         if common.FT_MODE and len(done) == CHECKPOINT_EVERY:
             await save(job_id, done, sid)
-            print(f"job {job_id}: checkpoint at student {sid}", flush=True)
+            obs.log("batch_checkpoint", f"job {job_id}: checkpoint at student {sid}", job_id=job_id)
             done = []
     await save(job_id, done, ids[-1] if ids else start, finished=True)
-    print(f"job {job_id}: done", flush=True)
+    obs.log("batch_done", f"job {job_id}: done", job_id=job_id)
 
 
 @app.post("/transcripts/batch", status_code=202)
@@ -133,10 +135,11 @@ async def resume_loop():
                 "  AND heartbeat < now() - make_interval(secs => $1) "
                 "  ORDER BY id LIMIT 1 FOR UPDATE SKIP LOCKED) RETURNING id", float(STALE_JOB_S))
             if job_id:
-                print(f"job {job_id}: runner died, resuming from checkpoint", flush=True)
+                obs.log("batch_resume", f"job {job_id}: runner died, resuming from checkpoint",
+                        level=logging.WARNING, job_id=job_id)
                 await run_job(job_id)
         except Exception as e:
-            print(f"resume loop error: {e!r}", flush=True)
+            obs.log("batch_resume_failed", f"resume loop error: {e!r}", level=logging.WARNING)
 
 
 @app.on_event("startup")

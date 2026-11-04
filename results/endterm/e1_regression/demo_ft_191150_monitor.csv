@@ -1,0 +1,35 @@
+ts,target,state,detail
+1793801515.566,student-1,down,ConnectError
+1793801515.566,student-2,down,ConnectError
+1793801515.566,transcript-1,down,ConnectError
+1793801515.566,transcript-2,down,ConnectError
+1793801515.566,payment-1,down,ConnectError
+1793801515.566,payment-2,down,ConnectError
+1793801515.566,mock-bank,up,
+1793801518.575,student-2,up,
+1793801518.575,transcript-2,degraded,student-service down
+1793801518.575,payment-1,up,
+1793801518.575,payment-2,up,
+1793801519.081,student-1,up,
+1793801519.081,transcript-1,degraded,student-service down
+1793801521.591,transcript-1,up,
+1793801521.591,transcript-2,up,
+1793801540.201,student-1,degraded,db on replica
+1793801540.201,student-2,degraded,db on replica
+1793801540.201,transcript-1,degraded,db on replica
+1793801540.201,transcript-2,degraded,db on replica
+1793801540.201,payment-1,degraded,db on replica
+1793801540.201,payment-2,degraded,db on replica
+1793801570.35,student-1,up,
+1793801570.35,student-2,up,
+1793801570.35,transcript-1,up,
+1793801570.35,transcript-2,up,
+1793801570.35,payment-1,up,
+1793801570.35,payment-2,up,
+1793801576.381,student-1,down,ConnectError
+1793801576.381,student-2,down,ConnectError
+1793801576.381,transcript-1,down,ConnectError
+1793801576.381,transcript-2,down,ConnectError
+1793801576.381,payment-1,down,ConnectError
+1793801576.381,payment-2,down,ConnectError
+1793801576.381,mock-bank,down,ConnectError

@@ -4,10 +4,13 @@ Used only when FT_MODE=on (see common.py and the services).
 """
 import asyncio
 import contextvars
+import logging
 import random
 import time
 
 import httpx
+
+import obs
 
 HTTP_TIMEOUT_S = 2.0   # every outgoing HTTP call
 DB_TIMEOUT_S = 2.0     # every DB connect and query
@@ -29,6 +32,7 @@ async def retry(fn, is_transient):
             box = retry_box.get()
             if box is not None:
                 box["retries"] += 1
+            obs.log("retry", f"attempt {attempt} failed: {type(e).__name__}", level=logging.WARNING)
             delay = BASE_DELAY_S * 2 ** (attempt - 1)
             await asyncio.sleep(delay + random.uniform(0, delay))  # jitter spreads retries out
 
@@ -59,7 +63,9 @@ class CircuitBreaker:
 
     def _set(self, state):
         if state != self.state:
-            print(f"{time.time():.3f} breaker {self.name}: {self.state} -> {state}", flush=True)
+            obs.log("breaker_state_change", f"breaker {self.name}: {self.state} -> {state}",
+                    level=logging.WARNING, target=self.name, state=state)
+            obs.set_breaker_state(self.name, state)
             self.state = state
         if state == "open":
             self.opened_at = time.time()

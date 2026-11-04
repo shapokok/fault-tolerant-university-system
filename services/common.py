@@ -1,17 +1,19 @@
 """Shared code for all services: config, DB access with replica fallback, /health and /ready."""
+import logging
 import os
-import socket
 from contextlib import asynccontextmanager
 
 import asyncpg
 import httpx
-from fastapi import FastAPI
+from fastapi import FastAPI, Response
 from fastapi.responses import JSONResponse
+from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 
 import ft
+import obs
 
 FT_MODE = os.getenv("FT_MODE", "off") == "on"
-INSTANCE = socket.gethostname()
+INSTANCE = obs.INSTANCE
 
 # Primary first. The replica is only set in the ft compose file.
 DB_URLS = {"primary": os.getenv("DATABASE_URL", "postgresql://uni:uni@postgres-primary:5432/uni")}
@@ -33,7 +35,9 @@ pools = {}
 
 def http_client():
     # FT: explicit timeout on every outgoing call. Baseline: httpx default (5 s).
-    return httpx.AsyncClient(timeout=ft.HTTP_TIMEOUT_S) if FT_MODE else httpx.AsyncClient()
+    # Both: forward the correlation ID.
+    headers = obs.outgoing_headers()
+    return httpx.AsyncClient(timeout=ft.HTTP_TIMEOUT_S, headers=headers) if FT_MODE else httpx.AsyncClient(headers=headers)
 
 
 async def get_pool(url):
@@ -106,16 +110,35 @@ async def transaction():
 
 def create_app(name, use_db=True, deps=None, breakers=()):
     """deps: {name: url} checked by /ready in FT mode. breakers: CircuitBreakers shown in /ready."""
+    obs.setup(name)
+    for b in breakers:
+        obs.set_breaker_state(b.name, b.state)  # so the gauge exists (0) before the first failure
     app = FastAPI(title=name)
 
     @app.middleware("http")
-    async def attempts_header(request, call_next):
+    async def observe(request, call_next):
+        rid = obs.read_request_id(request.headers.get("x-request-id"))
+        obs.request_id.set(rid)
         box = {"retries": 0}
         ft.retry_box.set(box)
-        response = await call_next(request)
+        start = obs.now()
+        try:
+            response = await call_next(request)
+        except Exception:
+            # Unhandled error: still count it, log it and return the IDs, the status stays 500.
+            obs.log("unhandled_error", f"{request.method} {request.url.path}", level=logging.ERROR, exc_info=True)
+            response = JSONResponse({"detail": "internal server error"}, status_code=500)
+        route = request.scope.get("route")  # the template (/students/{sid}), so labels stay few
+        obs.record_request(request.method, request.url.path, route.path if route else "unmatched",
+                           response.status_code, obs.now() - start)
+        response.headers["X-Request-ID"] = rid
         response.headers["X-Attempts"] = str(1 + box["retries"])
         response.headers["X-Instance"] = INSTANCE
         return response
+
+    @app.get("/metrics", include_in_schema=False)
+    async def metrics():
+        return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
     @app.exception_handler(asyncpg.ReadOnlySQLTransactionError)
     async def read_only(request, exc):
@@ -148,7 +171,8 @@ def create_app(name, use_db=True, deps=None, breakers=()):
             if body["db"] is None:
                 problems.append("db down")
         if FT_MODE:
-            async with httpx.AsyncClient(timeout=0.3) as client:  # below the monitor timeout (0.4 s)
+            # Timeout below the monitor timeout (0.4 s).
+            async with httpx.AsyncClient(timeout=0.3, headers=obs.outgoing_headers()) as client:
                 for dep, url in (deps or {}).items():
                     try:
                         ok = (await client.get(url)).status_code < 500

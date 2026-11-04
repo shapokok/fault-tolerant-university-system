@@ -1,0 +1,11 @@
+ Container uni-baseline-workload-run-73fbc0019b18 Creating 
+ Container uni-baseline-workload-run-73fbc0019b18 Created 
+workload started 1793800983.161
+wrote 900 rows to /results/raw/demo_baseline_190246_app_crash.csv
+endpoint        total    ok %   p50 ms   p95 ms
+timetable         354   100.0      5.1      7.3
+student           196   100.0      4.8      6.8
+payment           177    18.6  10003.9  10009.1
+registration       85   100.0      5.9      7.8
+transcript         88   100.0     14.9     18.5
+ALL               900    84.0      5.7  10005.4

@@ -5,6 +5,7 @@ FT: idempotency key, retry only when the bank surely did not debit, circuit brea
 completion in one transaction, reconciliation of payments with an unknown outcome.
 """
 import asyncio
+import logging
 import os
 import uuid
 from decimal import Decimal
@@ -17,6 +18,7 @@ from pydantic import BaseModel
 
 import common
 import ft
+import obs
 
 BANK_URL = os.getenv("BANK_URL", "http://mock-bank:8000")
 RECONCILE_EVERY_S = 5
@@ -54,13 +56,16 @@ async def complete(pid, bank_ref, amount):
             "WHERE id = $1 AND status = 'pending' RETURNING id", pid, bank_ref)
         if done:  # guard: only one caller (request or reconciliation) may write the ledger
             await conn.execute("INSERT INTO ledger (payment_id, amount) VALUES ($1, $2)", pid, amount)
-        return done is not None
+    if done:  # after the commit: a rollback must not count as completed
+        obs.PAYMENTS.labels(status="completed").inc()
+    return done is not None
 
 
 def replay(row):
     """Duplicate request: return the result of the original payment, do nothing new."""
     body = {"payment_id": row["id"], "status": row["status"], "bank_ref": row["bank_ref"], "replayed": True}
     code = {"completed": 200, "pending": 202}.get(row["status"], 502)
+    obs.PAYMENTS.labels(status="replayed").inc()
     return JSONResponse(body, status_code=code)
 
 
@@ -87,13 +92,16 @@ async def create_payment(p: PaymentIn, idempotency_key: str | None = Header(None
         result = await bank_breaker.call(lambda: ft.retry(lambda: charge(key, p.amount), bank_did_not_debit))
     except ft.CircuitOpen:
         await common.execute("UPDATE payments SET status = 'failed' WHERE id = $1", pid)
+        obs.PAYMENTS.labels(status="failed").inc()
         raise HTTPException(503, "bank unavailable (circuit open), try again later")
     except httpx.HTTPError as e:
         if bank_did_not_debit(e):
             await common.execute("UPDATE payments SET status = 'failed' WHERE id = $1", pid)
+            obs.PAYMENTS.labels(status="failed").inc()
             raise HTTPException(502, f"bank error: {type(e).__name__}")
         # Unknown outcome (timeout, bank crashed after debit): keep it pending,
         # reconciliation asks the bank later and completes or fails it.
+        obs.PAYMENTS.labels(status="pending").inc()
         return JSONResponse({"payment_id": pid, "status": "pending"}, status_code=202)
 
     # 3. Completion in one transaction. If the DB fails here, the payment stays
@@ -112,9 +120,11 @@ async def baseline_payment(p, key):
         result = await charge(key, p.amount)
     except httpx.HTTPError as e:
         await common.execute("UPDATE payments SET status = 'failed' WHERE id = $1", pid)
+        obs.PAYMENTS.labels(status="failed").inc()
         raise HTTPException(502, f"bank error: {e}")
     await common.execute("UPDATE payments SET status = 'completed', bank_ref = $2 WHERE id = $1", pid, result["bank_ref"])
     await common.execute("INSERT INTO ledger (payment_id, amount) VALUES ($1, $2)", pid, p.amount)
+    obs.PAYMENTS.labels(status="completed").inc()
     return {"payment_id": pid, "status": "completed", "bank_ref": result["bank_ref"]}
 
 
@@ -144,7 +154,9 @@ async def reconcile(min_age_s=RECONCILE_MIN_AGE_S):
         else:
             status = await common.execute(
                 "UPDATE payments SET status = 'failed' WHERE id = $1 AND status = 'pending'", row["id"])
-            fixed["failed"] += status == "UPDATE 1"
+            if status == "UPDATE 1":
+                fixed["failed"] += 1
+                obs.PAYMENTS.labels(status="failed").inc()
     return fixed
 
 
@@ -154,9 +166,9 @@ async def reconcile_loop():
         try:
             fixed = await reconcile()
             if any(fixed.values()):
-                print(f"reconciliation: {fixed}", flush=True)
+                obs.log("reconciliation", f"reconciled {fixed}", **fixed)
         except Exception as e:
-            print(f"reconciliation failed, will retry: {e!r}", flush=True)
+            obs.log("reconciliation_failed", f"will retry: {e!r}", level=logging.WARNING)
 
 
 @app.post("/admin/reconcile")

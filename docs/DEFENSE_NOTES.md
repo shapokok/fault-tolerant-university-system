@@ -401,3 +401,88 @@ high_load, where nothing failed. (The original monitor log cannot be checked any
 Talking points, in order: crash is healed in 1 s and hidden by the second instance; DB loss only blocks
 writes; the bank losing answers never loses money in FT (pending + reconciliation), while the baseline
 keeps the money and fails the payment.
+
+# Endterm
+
+## Stage E1: Observability
+
+### What was built, and why
+Observability lets us see what the system is doing while it runs. It is a measurement tool, not a resilience mechanism, so it runs in both modes and both can be measured the same way.
+
+| Part | File | How it works |
+|---|---|---|
+| Metrics, logs, correlation ID code | `services/obs.py` | All observability code is in one file |
+| Applied to every request | `services/common.py`, `create_app()`, middleware `observe()` | Reads the request ID, times the request, then calls `obs.record_request()` and sets the response headers. Also serves `GET /metrics` |
+| Breaker gauge | `services/ft.py`, `CircuitBreaker._set()` | Updates `circuit_breaker_state` on every state change: 0 closed, 1 half_open, 2 open |
+| Payment counter | `services/payment.py` | `payments_total{status}` counts events: `completed`, `pending`, `failed`, `replayed`. A reconciled payment counts once as pending and once as completed. `completed` is counted after the commit, so a rollback is not counted |
+| Forwarding the ID | `common.http_client()`, `obs.outgoing_headers()` | Every outgoing httpx call carries `X-Request-ID` |
+| Gateway | `gateway/observability.conf`, both nginx configs | nginx keeps a valid client ID (letters, digits, `_`, `-`, at most 64 characters) and otherwise uses its own `$request_id`. It logs each request as JSON and returns the ID on every response, including errors it generates itself |
+| Prometheus | `prometheus/prometheus.baseline.yml`, `prometheus.ft.yml` | Scrapes every 2 s, evaluates every 5 s. Port 9090, localhost only |
+| Grafana | `grafana/provisioning/`, `grafana/dashboards/university.json` | Datasource and the 8-panel dashboard load automatically. Anonymous viewers are allowed. Port 3000, localhost only |
+| Trace script | `experiments/trace_request.sh` | Sends one transcript request and fails unless its ID is in the gateway, transcript and student logs |
+| Check script | `experiments/check_observability.py` | Checks targets up, every service log line is valid JSON, Grafana loads anonymously, every dashboard query is valid |
+
+### Decisions to be able to defend
+- **`endpoint` is the route template** (`/students/{sid}`), not the real path. One label per student would create many time series.
+- **`honor_labels: true`.** Prometheus adds its own `instance` label. Without this option it would rename ours to `exported_instance`.
+- **`hostname:` in compose.** The `instance` label reads `payment-service-1` instead of a container hash.
+- **`/health`, `/ready` and `/metrics` are counted but not logged,** and the dashboard filters them out. The monitor, Docker and Prometheus call them all the time, so they would hide real traffic.
+- **`/metrics` is not routed through the gateway** (returns 404). Prometheus scrapes instances directly on the internal network.
+
+### Proof (real runs, 2026-11-04)
+| Check | FT | Baseline |
+|---|---|---|
+| Prometheus targets up | 7/7 | 4/4 |
+| Invalid service log lines | 0 | 0 |
+| `trace_request.sh` | pass | pass |
+| 30 s workload | 600/600 ok, p50 3.8 ms, p95 16.9 ms | 600/600 ok, p50 4.6 ms, p95 17.3 ms |
+| Payments: Prometheus = CSV = DB | 110 = 110 = 110 | 126 = 126 = 126 |
+| Replayed = resent keys | 9 = 9 | no idempotency |
+| Breaker gauge during a bank `error` fault | 0 -> 2 -> 0 on both instances | not used, stays 0 |
+| Unhandled error (student-service down) | not applicable, FT returns a partial result | 500 counted, JSON log with traceback, ID in the response |
+| Stopped service | | `up` = 0 |
+
+Midterm regression, `demo.sh` on the new code (`results/endterm/e1_regression_demo.txt`):
+| Scenario | Result |
+|---|---|
+| FT app_crash | 900/900 ok, `restarts=1`, PASS |
+| FT db_failure | 80.7% ok, PASS |
+| FT lost_transaction | 89.6% ok, PASS |
+| Baseline app_crash | 84.0% ok, `restarts=0`, FAIL (expected) |
+
+Does observability slow the system down? `db_failure` in FT, 3 runs each, on the same machine on the same day (`results/endterm/e1_db_failure_midterm_vs_e1.jsonl`):
+| Code | p50 (ms) | p95 (ms) | Success % |
+|---|---|---|---|
+| Midterm | 5.8, 6.0, 5.9 | 17.0, 16.7, 16.8 | 81.6, 79.3, 79.2 |
+| With E1 | 5.8, 5.2, 6.1 | 16.9, 13.7, 16.7 | 78.8, 80.8, 80.8 |
+
+The ranges overlap, so we see no measurable overhead. Three runs of one scenario cannot prove there is none.
+
+### Known limits (say these before you are asked)
+- **Unexplained stall.** In 1 of 4 E1 `db_failure` runs, every request was slow for about 3 s right after the primary stopped (61 requests over 200 ms, p95 945 ms in the demo output). The next 3 E1 runs and the 3 midterm runs did not repeat it, apart from at most one slow request per run. Raw data: `results/endterm/e1_regression/demo_ft_185441_db_failure.csv`. The cause is unknown. Repeated runs in E5 will show how often it happens.
+- **A crash can be shorter than the monitor's poll.** With the restart policy, `kill -9` caused an outage of only 0.29, 0.42 and 0.61 s (measured with a 20 ms poll). The monitor polls every 0.5 s and caught 3 of those 3, but missed the crash in the demo run, so detection time can be empty.
+- **`/ready` adds traffic in FT.** The transcript `/ready` check calls `/students/1` through the gateway on every monitor poll, so student-service shows extra requests that are not user traffic (about 256 of 439 in one short test). This is midterm behavior that the metrics made visible.
+- **`half_open` is rarely visible in the gauge.** It lasts milliseconds and Prometheus scrapes every 2 s. The log lines (`breaker_state_change`) do record it.
+- **Prometheus does not scrape nginx or Postgres.** "Instances up" covers service instances only.
+- **Not every line is JSON.** The nginx error log and the monitor's own output stay plain text. The gateway log uses `latency_s` instead of `latency_ms`, because nginx only reports seconds.
+- **Empty until later stages.** `auth_failures_total` and the 401/403 series until E3, firing alerts until E2. `rate_limited_total` needs a design decision in E3, because nginx sends 429 itself and services never see those requests.
+- **Grafana admin password** is still the default, on localhost only. It moves to `.env` in E3.
+- **`down -v` deletes Prometheus data.** Any export must happen before the stack stops.
+- **Midterm results were measured without observability.** See the overhead table above.
+
+### How to demo
+```bash
+docker compose -f docker-compose.ft.yml up -d --build
+open http://localhost:3000                       # dashboard, no login
+open http://localhost:9090/targets               # all targets up
+
+docker compose -f docker-compose.ft.yml run --rm workload python /exp/workload.py --duration 120 &
+experiments/trace_request.sh 1                   # one ID through gateway, transcript, student
+python3 experiments/check_observability.py ft
+
+# watch the breaker panel go to 2 and back (needs the workload running)
+curl -X POST localhost:8090/admin/fault -H 'content-type: application/json' -d '{"mode":"error"}'
+curl -X POST localhost:8090/admin/fault -H 'content-type: application/json' -d '{"mode":"none"}'
+
+docker compose -f docker-compose.ft.yml down -v
+```

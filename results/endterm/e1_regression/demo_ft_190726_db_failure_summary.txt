@@ -1,0 +1,11 @@
+ Container uni-ft-workload-run-e8848f60b0c8 Creating 
+ Container uni-ft-workload-run-e8848f60b0c8 Created 
+workload started 1793801266.216
+wrote 900 rows to /results/raw/demo_ft_190726_db_failure.csv
+endpoint        total    ok %   p50 ms   p95 ms
+timetable         352   100.0      4.9      8.8
+student           185   100.0      4.8      8.8
+payment           195    34.9     10.2     18.2
+registration       94    31.9      5.5      9.8
+transcript         74   100.0     14.6     24.1
+ALL               900    78.8      5.8     16.8

@@ -1,0 +1,161 @@
+
+== Start the ft stack
+backup: Up 12 seconds
+gateway: Up 15 seconds
+grafana: Up 15 seconds
+mock-bank: Up 15 seconds
+monitor: Up 15 seconds
+payment-service-1: Up 12 seconds (healthy)
+payment-service-2: Up 12 seconds (healthy)
+postgres-primary: Up 15 seconds (healthy)
+postgres-replica: Up 12 seconds (healthy)
+prometheus: Up 15 seconds
+student-service-1: Up 12 seconds (healthy)
+student-service-2: Up 12 seconds (healthy)
+transcript-service-1: Up 12 seconds (healthy)
+transcript-service-2: Up 12 seconds (healthy)
+
+== Scenario: app_crash (ft)
+   workload: 20 req/s for 45 s, fault injected at t=10 s
+   injected app_crash
+   payment container: running, restarts=1
+
+== What the monitor saw (time after injection)
+
+== Workload result
+endpoint        total    ok %   p50 ms   p95 ms
+timetable         356   100.0      2.4      4.9
+student           180   100.0      2.2      4.9
+payment           180   100.0     12.0     20.0
+registration       85   100.0      3.7      6.2
+transcript         99   100.0     10.9     17.7
+ALL               900   100.0      3.6     17.3
+
+== Consistency check
+   PASS - all checks passed
+
+== Start the ft stack
+backup: Up 11 seconds
+gateway: Up 14 seconds
+grafana: Up 14 seconds
+mock-bank: Up 14 seconds
+monitor: Up 14 seconds
+payment-service-1: Up 11 seconds (healthy)
+payment-service-2: Up 11 seconds (healthy)
+postgres-primary: Up 14 seconds (healthy)
+postgres-replica: Up 11 seconds (healthy)
+prometheus: Up 14 seconds
+student-service-1: Up 11 seconds (healthy)
+student-service-2: Up 11 seconds (healthy)
+transcript-service-1: Up 11 seconds (healthy)
+transcript-service-2: Up 11 seconds (healthy)
+
+== Scenario: db_failure (ft)
+   workload: 20 req/s for 45 s, fault injected at t=10 s
+   injected db_failure
+   read  GET /timetable/1     -> 200
+   write POST /registrations  -> 503
+
+== What the monitor saw (time after injection)
+   +0.15s  student-1     degraded  ready ReadTimeout
+   +0.15s  student-2     degraded  ready ReadTimeout
+   +0.15s  transcript-1  degraded  ready ReadTimeout
+   +0.15s  transcript-2  degraded  ready ReadTimeout
+   +0.15s  payment-1     degraded  ready ReadTimeout
+   +0.15s  payment-2     degraded  ready ReadTimeout
+   +30.79s  student-1     up        
+   +30.79s  student-2     up        
+   +30.79s  transcript-1  up        
+   +30.79s  transcript-2  up        
+   +30.79s  payment-1     up        
+   +30.79s  payment-2     up        
+
+== Workload result
+endpoint        total    ok %   p50 ms   p95 ms
+timetable         358   100.0      5.0   1255.9
+student           178   100.0      4.8     10.3
+payment           186    40.9      9.4    802.4
+registration       93    31.2      5.2     13.5
+transcript         85   100.0     15.6    574.1
+ALL               900    80.7      6.1    945.0
+
+== Consistency check
+   PASS - all checks passed
+
+== Start the ft stack
+backup: Up 4 minutes
+gateway: Up 5 minutes
+grafana: Up 5 minutes
+mock-bank: Up 5 minutes
+monitor: Up 5 minutes
+payment-service-1: Up 4 minutes (healthy)
+payment-service-2: Up 4 minutes (healthy)
+postgres-primary: Up 5 minutes (healthy)
+postgres-replica: Up 4 minutes (healthy)
+prometheus: Up 5 minutes
+student-service-1: Up 4 minutes (healthy)
+student-service-2: Up 4 minutes (healthy)
+transcript-service-1: Up 4 minutes (healthy)
+transcript-service-2: Up 4 minutes (healthy)
+
+== Scenario: lost_transaction (ft)
+   workload: 20 req/s for 45 s, fault injected at t=10 s
+   injected lost_transaction
+   POST /payments -> 503
+
+== What the monitor saw (time after injection)
+   +2.66s  payment-2     degraded  breaker mock-bank open
+   +4.17s  payment-1     degraded  breaker mock-bank open
+   +33.32s  payment-2     up        
+
+== Workload result
+endpoint        total    ok %   p50 ms   p95 ms
+timetable         365   100.0      2.7      5.9
+student           197   100.0      2.6      5.6
+payment           162    42.0      7.3     17.7
+registration       87   100.0      3.7      7.5
+transcript         89   100.0     11.2     17.2
+ALL               900    89.6      3.9     14.8
+
+== Payments before reconciliation
+   completed: 50
+   failed: 91
+   pending: 5
+
+== Consistency check
+   PASS - all checks passed
+
+== Done. Stop with: docker compose -f docker-compose.ft.yml down -v
+
+== Start the baseline stack
+gateway: Up 9 seconds
+grafana: Up 11 seconds
+mock-bank: Up 11 seconds
+monitor: Up 11 seconds
+payment-service: Up 9 seconds
+postgres-primary: Up 11 seconds (healthy)
+prometheus: Up 11 seconds
+student-service: Up 9 seconds
+transcript-service: Up 9 seconds
+
+== Scenario: app_crash (baseline)
+   workload: 20 req/s for 45 s, fault injected at t=10 s
+   injected app_crash
+   payment container: exited, restarts=0
+
+== What the monitor saw (time after injection)
+   +0.35s  payment       down      ConnectError
+
+== Workload result
+endpoint        total    ok %   p50 ms   p95 ms
+timetable         354   100.0      5.1      7.3
+student           196   100.0      4.8      6.8
+payment           177    18.6  10003.9  10009.1
+registration       85   100.0      5.9      7.8
+transcript         88   100.0     14.9     18.5
+ALL               900    84.0      5.7  10005.4
+
+== Consistency check
+   FAIL - 1 payments completed more than once; 1 keys charged more than once by the bank
+
+== Done. Stop with: docker compose -f docker-compose.baseline.yml down -v

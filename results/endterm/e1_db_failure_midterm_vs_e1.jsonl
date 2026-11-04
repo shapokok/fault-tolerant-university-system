@@ -1,0 +1,6 @@
+{"rep": 1, "code": "midterm", "n": 900, "ok_pct": 81.6, "p50": 5.8, "p95": 17.0, "max": 2009.5, "slow": 1, "slow_from": 9.9, "slow_to": 9.9}
+{"rep": 1, "code": "E1", "n": 900, "ok_pct": 78.8, "p50": 5.8, "p95": 16.9, "max": 37.6, "slow": 0, "slow_from": null, "slow_to": null}
+{"rep": 2, "code": "midterm", "n": 900, "ok_pct": 79.3, "p50": 6.0, "p95": 16.7, "max": 28.3, "slow": 0, "slow_from": null, "slow_to": null}
+{"rep": 2, "code": "E1", "n": 900, "ok_pct": 80.8, "p50": 5.2, "p95": 13.7, "max": 2007.5, "slow": 1, "slow_from": 9.7, "slow_to": 9.7}
+{"rep": 3, "code": "midterm", "n": 900, "ok_pct": 79.2, "p50": 5.9, "p95": 16.8, "max": 38.6, "slow": 0, "slow_from": null, "slow_to": null}
+{"rep": 3, "code": "E1", "n": 900, "ok_pct": 80.8, "p50": 6.1, "p95": 16.7, "max": 2004.0, "slow": 1, "slow_from": 9.9, "slow_to": 9.9}

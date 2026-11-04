@@ -1,3 +1,4 @@
+> Midterm is finished. Current work: endterm, see ENDTERM.md. Read both files.
 # Midterm: Fault-Tolerant University Information System
 
 ## Goal

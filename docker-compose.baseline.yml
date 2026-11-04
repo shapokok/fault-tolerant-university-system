@@ -29,25 +29,31 @@ services:
 
   student-service:
     <<: *service
+    hostname: student-service
     command: uvicorn student:app --host 0.0.0.0 --port 8000
 
   transcript-service:
     <<: *service
+    hostname: transcript-service
     command: uvicorn transcript:app --host 0.0.0.0 --port 8000
 
   payment-service:
     <<: *service
+    hostname: payment-service
     command: uvicorn payment:app --host 0.0.0.0 --port 8000
 
   mock-bank:
+    hostname: mock-bank
     build: ./services
     command: uvicorn mockbank:app --host 0.0.0.0 --port 8000
     ports:
       - "8090:8000"
 
   gateway:
+    hostname: gateway
     image: nginx:1.27-alpine
     volumes:
+      - ./gateway/observability.conf:/etc/nginx/conf.d/00-observability.conf:ro
       - ./gateway/nginx.baseline.conf:/etc/nginx/conf.d/default.conf:ro
     ports:
       - "8080:80"
@@ -63,6 +69,31 @@ services:
         student=http://student-service:8000,transcript=http://transcript-service:8000,payment=http://payment-service:8000,mock-bank=http://mock-bank:8000
     volumes:
       - ./results:/results
+
+  # ---------- observability (both modes, measurement only) ----------
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    restart: unless-stopped
+    volumes:
+      - ./prometheus/prometheus.baseline.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "127.0.0.1:9090:9090"
+
+  grafana:
+    image: grafana/grafana:11.3.0
+    restart: unless-stopped
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /var/lib/grafana/dashboards/university.json
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on: [prometheus]
 
   # Load generator, run on demand: docker compose -f ... run --rm workload
   workload:
