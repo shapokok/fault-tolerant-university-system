@@ -1,0 +1,5 @@
+ts,alertname,instance,service,target,state
+1793981538.498,HighErrorRate,,mock-bank,,firing
+1793981538.498,HighErrorRate,,payment-service,,firing
+1793981593.815,HighErrorRate,,mock-bank,,resolved
+1793981593.819,HighErrorRate,,payment-service,,resolved

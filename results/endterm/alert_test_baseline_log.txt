@@ -1,0 +1,6 @@
+
+=== instance_crash_baseline
+{'case': 'instance_crash', 'mode': 'baseline', 'inject_ts': 1793981360.963, 'alert': 'InstanceDown', 'firing_delay_s': 12.2, 'resolved_after_s': '', 'pending_only': '', 'requests': 3000, 'max_poll_gap_s': 1.0, 'run_s': 151, 'verdict': 'PASS', 'reason': 'as expected (InstanceDown still firing at the end: nothing restarts the process)'}
+
+=== bank_error_baseline
+{'case': 'bank_error', 'mode': 'baseline', 'inject_ts': 1793981531.352, 'alert': 'HighErrorRate', 'firing_delay_s': 7.1, 'resolved_after_s': 62.5, 'pending_only': '', 'requests': 3000, 'max_poll_gap_s': 1.0, 'run_s': 150, 'verdict': 'PASS', 'reason': 'as expected'}

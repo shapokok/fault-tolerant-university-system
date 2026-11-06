@@ -1,0 +1,23 @@
+
+=== instance_crash_ft
+{'case': 'instance_crash', 'mode': 'ft', 'inject_ts': 1793803316.083, 'alert': 'InstanceRestarted', 'firing_delay_s': 3.2, 'resolved_after_s': 422.8, 'pending_only': '', 'verdict': 'PASS', 'reason': 'as expected'}
+
+=== instance_stop_ft
+{'case': 'instance_stop', 'mode': 'ft', 'inject_ts': 1793803807.675, 'alert': 'InstanceDown', 'firing_delay_s': 12.1, 'resolved_after_s': 37.3, 'pending_only': '', 'verdict': 'PASS', 'reason': 'as expected'}
+
+=== bank_error_ft
+{'case': 'bank_error', 'mode': 'ft', 'inject_ts': 1793805199.658, 'alert': 'CircuitBreakerOpen', 'firing_delay_s': 999.0, 'resolved_after_s': 1191.6, 'pending_only': '', 'verdict': 'PASS', 'reason': 'as expected'}
+{'case': 'bank_error', 'mode': 'ft', 'inject_ts': 1793805199.658, 'alert': 'HighErrorRate', 'firing_delay_s': 999.0, 'resolved_after_s': 1191.6, 'pending_only': '', 'verdict': 'PASS', 'reason': 'as expected'}
+{'case': 'bank_error', 'mode': 'ft', 'inject_ts': 1793805199.658, 'alert': 'HighLatencyP95', 'firing_delay_s': 999.0, 'resolved_after_s': 1191.6, 'pending_only': '', 'verdict': 'PASS', 'reason': 'as expected'}
+
+=== bank_slow_ft
+{'case': 'bank_slow', 'mode': 'ft', 'inject_ts': 1793807505.167, 'alert': 'HighLatencyP95', 'firing_delay_s': 967.2, 'resolved_after_s': 3066.6, 'pending_only': '', 'verdict': 'PASS', 'reason': 'as expected'}
+
+=== normal_load_ft
+{'case': 'normal_load', 'mode': 'ft', 'inject_ts': 1793811665.996, 'alert': '(none)', 'firing_delay_s': '', 'resolved_after_s': '', 'pending_only': '', 'verdict': 'PASS', 'reason': 'as expected'}
+
+=== instance_crash_baseline
+{'case': 'instance_crash', 'mode': 'baseline', 'inject_ts': 1793814223.174, 'alert': 'InstanceDown', 'firing_delay_s': '', 'resolved_after_s': '', 'pending_only': '', 'verdict': 'FAIL', 'reason': "did not fire: ['InstanceDown']"}
+
+=== bank_error_baseline
+{'case': 'bank_error', 'mode': 'baseline', 'inject_ts': 1793814242.019, 'alert': 'HighErrorRate', 'firing_delay_s': '', 'resolved_after_s': '', 'pending_only': '', 'verdict': 'FAIL', 'reason': "did not fire: ['HighErrorRate']"}

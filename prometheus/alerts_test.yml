@@ -1,0 +1,40 @@
+# promtool unit tests with SIMULATED series, for the two rules that cannot fire on real
+# traffic until stage E3 adds authentication and rate limiting.
+# Run: see docs/alerts.md
+rule_files: [alerts.yml]
+evaluation_interval: 5s
+tests:
+  - interval: 15s
+    input_series:
+      - series: 'http_requests_total{service="s",instance="i",endpoint="/e",method="GET",status="401",source="user"}'
+        values: '0+10x20'  # 40 per minute, above the threshold of 20
+      - series: 'rate_limited_total{job="services",instance="i"}'
+        values: '0+20x20'  # 80 per minute, above the threshold of 50
+    alert_rule_test:
+      - eval_time: 3m
+        alertname: AuthFailureSpike
+        exp_alerts:
+          - exp_labels: {severity: warning}
+            exp_annotations:
+              summary: "More than 20 auth failures per minute"
+              response: "Possible brute force. Check the audit log."
+      - eval_time: 3m
+        alertname: RateLimitSpike
+        exp_alerts:
+          - exp_labels: {severity: warning}
+            exp_annotations:
+              summary: "More than 50 rate limited requests per minute"
+              response: "Possible abuse. Block the source."
+  - interval: 15s
+    input_series:
+      - series: 'http_requests_total{service="s",instance="i",endpoint="/e",method="GET",status="403",source="user"}'
+        values: '0+1x20'   # 4 per minute, below the threshold
+      - series: 'rate_limited_total{job="services",instance="i"}'
+        values: '0+2x20'   # 8 per minute, below the threshold
+    alert_rule_test:
+      - eval_time: 3m
+        alertname: AuthFailureSpike
+        exp_alerts: []
+      - eval_time: 3m
+        alertname: RateLimitSpike
+        exp_alerts: []

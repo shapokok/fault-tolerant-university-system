@@ -1,0 +1,7 @@
+traffic                                   workload CSV  Prometheus user
+timetable                                          246              246  OK
+registration                                        61               61  OK
+payment                                            104              104  OK
+transcript                                          52               52  OK
+student + transcript calls to student              189              189  OK
+probe calls to student-service in the same 35 s (transcript /ready checks): 143

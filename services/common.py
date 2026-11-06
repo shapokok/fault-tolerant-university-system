@@ -129,8 +129,9 @@ def create_app(name, use_db=True, deps=None, breakers=()):
             obs.log("unhandled_error", f"{request.method} {request.url.path}", level=logging.ERROR, exc_info=True)
             response = JSONResponse({"detail": "internal server error"}, status_code=500)
         route = request.scope.get("route")  # the template (/students/{sid}), so labels stay few
+        source = "probe" if request.headers.get("x-probe") == "1" else "user"
         obs.record_request(request.method, request.url.path, route.path if route else "unmatched",
-                           response.status_code, obs.now() - start)
+                           response.status_code, obs.now() - start, source)
         response.headers["X-Request-ID"] = rid
         response.headers["X-Attempts"] = str(1 + box["retries"])
         response.headers["X-Instance"] = INSTANCE
@@ -172,7 +173,7 @@ def create_app(name, use_db=True, deps=None, breakers=()):
                 problems.append("db down")
         if FT_MODE:
             # Timeout below the monitor timeout (0.4 s).
-            async with httpx.AsyncClient(timeout=0.3, headers=obs.outgoing_headers()) as client:
+            async with httpx.AsyncClient(timeout=0.3, headers={**obs.outgoing_headers(), "X-Probe": "1"}) as client:
                 for dep, url in (deps or {}).items():
                     try:
                         ok = (await client.get(url)).status_code < 500

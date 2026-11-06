@@ -1,0 +1,3 @@
+case,mode,inject_ts,alert,firing_delay_s,resolved_after_s,pending_only,verdict,reason
+instance_crash,baseline,1793814223.174,InstanceDown,,,,FAIL,did not fire: ['InstanceDown']
+bank_error,baseline,1793814242.019,HighErrorRate,,,,FAIL,did not fire: ['HighErrorRate']

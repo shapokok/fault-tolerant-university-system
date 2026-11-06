@@ -1,0 +1,57 @@
+# Thresholds and expected responses are explained in docs/alerts.md.
+groups:
+  - name: university
+    rules:
+      - alert: InstanceDown
+        expr: up{job="services"} == 0
+        for: 10s
+        labels: {severity: critical}
+        annotations:
+          summary: "Instance is down"
+          response: "Restart policy should bring it back. If not, check the container."
+
+      - alert: InstanceRestarted
+        expr: changes(process_start_time_seconds{job="services"}[1m]) > 0
+        labels: {severity: warning}
+        annotations:
+          summary: "Instance process restarted"
+          response: "A crash was masked by the restart. Check the logs for the cause."
+
+      - alert: HighErrorRate
+        expr: >-
+          sum by (service) (rate(http_requests_total{source="user",endpoint!~"/health|/ready|/metrics",status=~"5.."}[30s]))
+          / sum by (service) (rate(http_requests_total{source="user",endpoint!~"/health|/ready|/metrics"}[30s])) > 0.05
+        labels: {severity: critical}
+        annotations:
+          summary: "More than 5% of requests fail with 5xx"
+          response: "Check the failing service and the breaker state."
+
+      - alert: HighLatencyP95
+        expr: >-
+          histogram_quantile(0.95, sum by (le, service)
+          (rate(http_request_duration_seconds_bucket{source="user",endpoint!~"/health|/ready|/metrics"}[30s]))) > 0.5
+        labels: {severity: warning}
+        annotations:
+          summary: "p95 latency is above 500 ms"
+          response: "Check the load and any slow dependency."
+
+      - alert: CircuitBreakerOpen
+        expr: circuit_breaker_state == 2
+        labels: {severity: critical}
+        annotations:
+          summary: "Circuit breaker is open"
+          response: "Check the dependency (bank or student-service)."
+
+      - alert: AuthFailureSpike
+        expr: sum(increase(http_requests_total{status=~"401|403"}[1m])) > 20
+        labels: {severity: warning}
+        annotations:
+          summary: "More than 20 auth failures per minute"
+          response: "Possible brute force. Check the audit log."
+
+      - alert: RateLimitSpike
+        expr: sum(increase(rate_limited_total[1m])) > 50
+        labels: {severity: warning}
+        annotations:
+          summary: "More than 50 rate limited requests per minute"
+          response: "Possible abuse. Block the source."

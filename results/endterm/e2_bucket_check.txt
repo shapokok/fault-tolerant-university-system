@@ -1,0 +1,4 @@
+bank delay 1 s, same 30 s window:
+  payment-service p95 from the histogram (Prometheus): 1095 ms
+  payment p95 measured by the client (workload CSV, 126 payments): 1024 ms
+  mock-bank p95 from the histogram: 1095 ms

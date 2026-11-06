@@ -1,0 +1,3 @@
+ts,alertname,instance,service,target,state
+1793808472.383,HighLatencyP95,,mock-bank,,firing
+1793810571.77,HighLatencyP95,,mock-bank,,resolved

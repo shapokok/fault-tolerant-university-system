@@ -486,3 +486,129 @@ curl -X POST localhost:8090/admin/fault -H 'content-type: application/json' -d '
 
 docker compose -f docker-compose.ft.yml down -v
 ```
+
+## Stage E2: Alerting
+
+### What was built, and why
+Alerts turn "something is wrong" into a timestamped signal, so detection can be measured instead of guessed.
+
+| Part | File, function | How it works |
+|---|---|---|
+| 7 alert rules | `prometheus/alerts.yml` | Loaded by both Prometheus configs (`rule_files`), evaluated every 5 s. Thresholds, reasons and responses: `docs/alerts.md` |
+| Rule unit tests | `prometheus/alerts_test.yml` | promtool with SIMULATED series for AuthFailureSpike and RateLimitSpike (they need auth and rate limits from E3). Both fire above the threshold and stay silent below it |
+| Alert recorder | `experiments/alert_watch.py`, `watch()` | Polls `/api/v1/alerts` every 1 s and writes each state change (pending, firing, resolved) with a timestamp to `results/endterm/alerts_<run>.csv`. Records the longest pause between two polls |
+| Alert test | `experiments/alert_test.py`, `CASES`, `run_case()` | Per case: fresh stack, workload, fault at t=20 s. Each case lists the alerts that must fire and those that must not. Verdict PASS, FAIL or INVALID |
+| Probe label | `obs.record_request()`, middleware in `common.create_app()`, `/ready` | `/ready` checks send `X-Probe: 1`. Those calls are counted with `source="probe"`, all other traffic with `source="user"`. nginx does not log them (`map $http_x_probe`). Rules and dashboard count only `source="user"` |
+| Dashboard | `grafana/dashboards/university.json` | Error rate shows 0 instead of "No data". Default range is the last 5 minutes. Requests shows probes as a separate line. New "Alert history" panel shows which alert fired when |
+| Finer latency buckets | `obs.BUCKETS` | Prometheus estimates a quantile inside a bucket, so the bucket edges must be close to real latencies (details below) |
+
+Two different faults for the instance alerts (your decision, also in the report):
+- `kill -9` of the process: the restart policy brings it back in 0.3 to 0.6 s. Used for availability numbers.
+  InstanceDown (`up == 0` for 10 s) cannot fire on such a short outage. InstanceRestarted
+  (`changes(process_start_time_seconds[1m]) > 0`) catches it.
+- `docker stop` for 30 s: the instance is really gone. Used for the alert test and the demo. InstanceDown fires and resolves.
+
+### Interrupted first series (not used)
+The first full alert test series (started 2026-11-04, about 19:45) was ruined by the Mac sleeping:
+`pmset -g log` shows "Entering Sleep state" many times from 19:41 on, and Docker Desktop was not running afterwards.
+Signs: firing delays of 967 to 999 s in 150 s runs, resolution after 3066 s, two baseline cases only 19 s apart,
+baseline alerts "did not fire" because the stack was down. The old script still wrote PASS for several of those rows,
+because it did not check that a run was continuous.
+- All files of that series were moved to `results/endterm/interrupted/` (README there explains why). None of it is used.
+- Fix in `alert_test.py`: a run is INVALID if alert polling paused for more than 3 s, if it took more than 30 s longer
+  than planned, or if fewer than 95% of the planned requests were sent.
+- The series was rerun on 2026-11-06 with the laptop awake: every run had a poll gap of 1.0 s, ran 150 s
+  (normal load 320 s) and sent all planned requests.
+
+### Results (valid series, `results/endterm/alert_test.csv`, `alert_test_baseline.csv`)
+Detection delay = fault injected -> alert `firing`. It is made of: up to 2 s until the next scrape, up to 5 s until the
+next rule evaluation, plus the rule's `for` time (InstanceDown: 10 s).
+
+| Case | Mode | Alert | Fired after | Resolved after | Verdict |
+|---|---|---|---|---|---|
+| `kill -9` payment-service-1 | FT | InstanceRestarted | 5.1 s | 60.4 s | PASS |
+| | FT | InstanceDown | never (not even pending), correct: the outage was masked | | |
+| `docker stop` 30 s | FT | InstanceDown | 17.2 s | 37.3 s | PASS |
+| | FT | InstanceRestarted (process started again) | 37.3 s | 62.5 s | |
+| bank `error` 30 s | FT | CircuitBreakerOpen | 4.1 s | 39.4 s | PASS |
+| | FT | HighErrorRate | 9.2 s | 79.6 s | |
+| | FT | HighLatencyP95 (not required, see findings) | 4.1 s | 34.3 s | |
+| bank `delay 1 s` 45 s | FT | HighLatencyP95 | 6.1 s | 76.6 s | PASS |
+| normal load 320 s, no fault | FT | none, not even pending (6400 requests) | | | PASS |
+| `kill -9` payment-service | Baseline | InstanceDown | 12.2 s | never, correct: nothing restarts the process | PASS |
+| | Baseline | InstanceRestarted | never, correct: no restart | | |
+| bank `error` 30 s | Baseline | HighErrorRate | 7.1 s | 62.5 s | PASS |
+| | Baseline | CircuitBreakerOpen | never, correct: the baseline has no breaker | | |
+
+The first valid series gave 14.2 s and 3.1 s for the two baseline cases, but the script wrote FAIL for the crash:
+it expected every alert to resolve, which is wrong for a system without a restart policy. Fixed (`STAYS_FIRING`)
+and both baseline cases rerun. Old output: `results/endterm/alert_test_log.txt`.
+
+FT vs baseline: detection is about as fast in both modes (differences of a few seconds come from the 2 s scrape and
+5 s evaluation steps). What differs is what there is to detect: in FT the crash is masked (only InstanceRestarted, no
+user errors), in the baseline the instance stays down and InstanceDown fires until someone acts. The breaker signal
+exists only in FT.
+
+Also: `promtool test rules` for AuthFailureSpike and RateLimitSpike (simulated series): SUCCESS. These two rules get
+real tests in E5.
+
+Probe label check (`results/endterm/e2_probe_check.txt`): over one 30 s workload, Prometheus `source="user"` counters
+matched the workload CSV exactly for all 5 traffic types (timetable 246, registration 61, payment 104, transcript 52,
+student-service calls 189). In the same 35 s, 143 calls came from `/ready` checks and were counted as probes.
+
+### Grafana screenshots (FT, 2026-11-06, 20:48 to 21:08)
+Faults were held until each screenshot was taken, so this session is an illustration, not a measurement (the measured
+numbers are the table above). Alert states of the session: `results/endterm/alerts_screenshots_ft.csv`.
+The session's request log was not saved: the workload writes its CSV only when it finishes, and it was stopped early.
+
+| # | Moment | What it shows |
+|---|---|---|
+| 1 | Normal load | All 7 instances UP, error rate 0, breakers 0, no alerts (retaken after the 1 ms / 2.5 ms bucket fix and the Alert history fix) |
+| 2 | `kill -9` payment-service-1 (20:53:45) | Alert history: InstanceRestarted only, no InstanceDown. Instances up: all UP; the crash is one `up=0` sample (20:53:47) |
+| 3 | `docker stop` payment-service-1 (20:56:11) | payment-service-1 DOWN, InstanceDown firing (pending after 2.3 s, firing after 12.3 s), payments continue via payment-service-2 |
+| 4 | Started again (20:58:13) | InstanceDown resolved after 4.2 s. InstanceRestarted did not fire: the stop lasted 2 min, longer than the rule's 1 min window |
+| 5 | Bank `error` (21:00:43) | Error rate: bank 100%, payment-service 91%, others 0. Both breakers 2. Payments: failed up. HighErrorRate and CircuitBreakerOpen fired after 5.1 s |
+| 6 | Bank `delay 1 s` (21:03:53) | HighLatencyP95 fired after 5.1 s, breakers stay 0. The latency panel on this screenshot overstates p95: about 2.4 s for a real 1.0 s, because of the old buckets (fixed after the session, screenshot not retaken). Report latencies come from the workload CSV |
+
+### Findings (say these before you are asked)
+- **Replays of failed payments count as server errors.** Idempotency returns the original result, which for a failed
+  payment is 502. After a bank fault the workload keeps resending some failed keys, so payment-service keeps returning
+  a few 502 with no new failure. Measured in the screenshot session, slow-bank phase: 0 new failed payments, 5.4
+  replays answered 502 in 30 s (4.3% of payment requests), and HighErrorRate fired twice (15 s and 5 s). True by the
+  rule, but not a current problem. Open decision, see the end of this section.
+- **CircuitBreakerOpen flaps during a long outage.** The breaker passes through half_open every 10 s. When a scrape
+  catches it, the alert resolves and fires again 5 s later. No `for` on this rule on purpose: it follows the breaker
+  exactly.
+- **HighLatencyP95 also fires during bank errors.** Before the breaker opens, payments wait for retries with backoff:
+  payment p95 513 ms during the fault, 19.9 ms before. Correct by the rule, but right at the threshold.
+- **InstanceRestarted only sees fast restarts** (old start time must be inside the last minute). Long outages are
+  covered by InstanceDown.
+- **Latency panels are estimates.** Prometheus interpolates inside a histogram bucket. With the default
+  edges a 1 s bank delay was shown as p95 2.4 s (bucket 1 to 2.5 s). With the added edges (1.1, 1.25, 1.5, 2, 3 s)
+  the same delay shows 1095 ms against 1024 ms measured by the client (`results/endterm/e2_bucket_check.txt`).
+  Exact latencies for the report always come from the workload CSV.
+- **The rules were measured with the default buckets** (before the 1 ms / 2.5 ms and 1.1 to 3 s edges were added).
+  The 0.25, 0.5 and 0.75 s edges never changed, so HighLatencyP95 (500 ms) behaves the same with the new buckets.
+
+### How to demo
+```bash
+docker compose -f docker-compose.ft.yml up -d --build
+open http://localhost:3000                         # dashboard: Alert history at the bottom
+open http://localhost:9090/alerts                  # all 7 rules and their state
+docker compose -f docker-compose.ft.yml run --rm workload python /exp/workload.py --duration 600 &
+python3 experiments/alert_watch.py demo --seconds 300 &      # writes results/endterm/alerts_demo.csv
+
+python3 experiments/inject.py app_crash ft         # InstanceRestarted only
+docker stop uni-ft-payment-service-1-1             # InstanceDown after about 17 s
+docker start uni-ft-payment-service-1-1            # resolved after a few seconds
+curl -X POST localhost:8090/admin/fault -H 'content-type: application/json' -d '{"mode":"error"}'   # breaker + errors
+curl -X POST localhost:8090/admin/fault -H 'content-type: application/json' -d '{"mode":"none"}'
+
+python3 experiments/alert_test.py --cases instance_crash --modes ft   # one measured case, about 3 min
+docker run --rm --entrypoint promtool -v "$PWD/prometheus:/p:ro" -w /p prom/prometheus:v2.55.1 test rules alerts_test.yml
+```
+
+### Open question for E3
+Replays of failed payments return 502 and count as server errors (see findings). Options: keep and document;
+return 409 for a replay of a failed payment; or label replays separately (`source="replay"`) so the error rate
+and HighErrorRate count only new requests, while the response itself stays the original result.

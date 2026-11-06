@@ -21,9 +21,15 @@ INSTANCE = socket.gethostname()  # compose sets hostname, e.g. payment-service-1
 # ---------- metrics ----------
 
 HTTP_REQUESTS = Counter("http_requests_total", "HTTP requests handled",
-                        ["service", "instance", "endpoint", "method", "status"])
+                        ["service", "instance", "endpoint", "method", "status", "source"])
+# Prometheus can only estimate a quantile inside a bucket, so bucket edges must be close to the
+# latencies we cause. Default edges plus: 1 ms and 2.5 ms (fast services take about 1 ms), and
+# 1.1, 1.25, 1.5, 2 and 3 s (a 1 s bank delay was shown as 2.4 s with only the 1 s and 2.5 s edges).
+# 0.25, 0.5 and 0.75 are unchanged, so the HighLatencyP95 rule (500 ms) works exactly as before.
+BUCKETS = (0.001, 0.0025, 0.005, 0.01, 0.025, 0.05, 0.075, 0.1, 0.25, 0.5, 0.75,
+           1.0, 1.1, 1.25, 1.5, 2.0, 2.5, 3.0, 5.0, 7.5, 10.0)
 HTTP_DURATION = Histogram("http_request_duration_seconds", "HTTP request duration",
-                          ["service", "endpoint"])
+                          ["service", "endpoint", "source"], buckets=BUCKETS)
 BREAKER_STATE = Gauge("circuit_breaker_state", "0 closed, 1 half_open, 2 open", ["service", "target"])
 PAYMENTS = Counter("payments_total", "Payment events (a reconciled payment counts as pending, then completed)",
                    ["status"])
@@ -109,11 +115,12 @@ def log(event, message="", level=logging.INFO, exc_info=False, **fields):
 NOT_LOGGED = {"/health", "/ready", "/metrics"}
 
 
-def record_request(method, path, endpoint, status, seconds):
+def record_request(method, path, endpoint, status, seconds, source="user"):
+    """source is "probe" for calls made by a /ready check (header X-Probe: 1), else "user"."""
     HTTP_REQUESTS.labels(service=SERVICE, instance=INSTANCE, endpoint=endpoint, method=method,
-                         status=str(status)).inc()
-    HTTP_DURATION.labels(service=SERVICE, endpoint=endpoint).observe(seconds)
-    if path in NOT_LOGGED:
+                         status=str(status), source=source).inc()
+    HTTP_DURATION.labels(service=SERVICE, endpoint=endpoint, source=source).observe(seconds)
+    if path in NOT_LOGGED or source == "probe":
         return
     level = logging.ERROR if status >= 500 else logging.WARNING if status >= 400 else logging.INFO
     log("http_request", f"{method} {path} {status}", level=level, method=method, path=path,

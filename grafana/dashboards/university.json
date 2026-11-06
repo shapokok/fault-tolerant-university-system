@@ -2,7 +2,7 @@
   "uid": "university",
   "title": "University platform",
   "schemaVersion": 39,
-  "version": 1,
+  "version": 3,
   "editable": false,
   "refresh": "5s",
   "time": {
@@ -16,7 +16,7 @@
   "panels": [
     {
       "id": 1,
-      "title": "Requests per second, per service",
+      "title": "Requests per second, per service (probes shown separately)",
       "type": "timeseries",
       "datasource": {
         "type": "prometheus",
@@ -41,8 +41,17 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum by (service) (rate(http_requests_total{endpoint!~\"/health|/ready|/metrics\"}[30s]))",
+          "expr": "sum by (service) (rate(http_requests_total{endpoint!~\"/health|/ready|/metrics\",source=\"user\"}[30s]))",
           "legendFormat": "{{service}}"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum by (service) (rate(http_requests_total{endpoint!~\"/health|/ready|/metrics\",source=\"probe\"}[30s]))",
+          "legendFormat": "{{service}} (probes)"
         }
       ]
     },
@@ -74,7 +83,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "(100 * sum by (service) (rate(http_requests_total{endpoint!~\"/health|/ready|/metrics\",status=~\"5..\"}[30s])) / sum by (service) (rate(http_requests_total{endpoint!~\"/health|/ready|/metrics\"}[30s]))) or (sum by (service) (rate(http_requests_total{endpoint!~\"/health|/ready|/metrics\"}[30s])) * 0)",
+          "expr": "(100 * sum by (service) (rate(http_requests_total{endpoint!~\"/health|/ready|/metrics\",source=\"user\",status=~\"5..\"}[30s])) / sum by (service) (rate(http_requests_total{endpoint!~\"/health|/ready|/metrics\",source=\"user\"}[30s]))) or (sum by (service) (rate(http_requests_total{endpoint!~\"/health|/ready|/metrics\",source=\"user\"}[30s])) * 0)",
           "legendFormat": "{{service}}"
         }
       ]
@@ -106,7 +115,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "histogram_quantile(0.50, sum by (le, service) (rate(http_request_duration_seconds_bucket{endpoint!~\"/health|/ready|/metrics\"}[30s])))",
+          "expr": "histogram_quantile(0.50, sum by (le, service) (rate(http_request_duration_seconds_bucket{endpoint!~\"/health|/ready|/metrics\",source=\"user\"}[30s])))",
           "legendFormat": "p50 {{service}}"
         },
         {
@@ -115,7 +124,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "histogram_quantile(0.95, sum by (le, service) (rate(http_request_duration_seconds_bucket{endpoint!~\"/health|/ready|/metrics\"}[30s])))",
+          "expr": "histogram_quantile(0.95, sum by (le, service) (rate(http_request_duration_seconds_bucket{endpoint!~\"/health|/ready|/metrics\",source=\"user\"}[30s])))",
           "legendFormat": "p95 {{service}}"
         }
       ]
@@ -290,7 +299,7 @@
     },
     {
       "id": 8,
-      "title": "Firing alerts (rules from stage E2)",
+      "title": "Firing alerts",
       "type": "stat",
       "datasource": {
         "type": "prometheus",
@@ -315,6 +324,79 @@
           },
           "expr": "count(ALERTS{alertstate=\"firing\"}) or vector(0)",
           "legendFormat": "firing"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "title": "Alert history",
+      "type": "state-timeline",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 32,
+        "w": 24,
+        "h": 7
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "none",
+                  "color": "green"
+                }
+              }
+            },
+            {
+              "type": "range",
+              "options": {
+                "from": 1,
+                "to": 1000,
+                "result": {
+                  "text": "firing",
+                  "color": "red"
+                }
+              }
+            }
+          ],
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "green"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "showValue": "auto",
+        "legend": {
+          "showLegend": false
+        },
+        "mergeValues": true
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum by (alertname) (ALERTS{alertstate=\"firing\"})",
+          "legendFormat": "{{alertname}}"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "vector(0) unless on() count(ALERTS{alertstate=\"firing\"})",
+          "legendFormat": "no alerts firing"
         }
       ]
     }

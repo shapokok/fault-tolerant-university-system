@@ -1,0 +1,8 @@
+case,mode,inject_ts,alert,firing_delay_s,resolved_after_s,pending_only,verdict,reason
+instance_crash,ft,1793803316.083,InstanceRestarted,3.2,422.8,,PASS,as expected
+instance_stop,ft,1793803807.675,InstanceDown,12.1,37.3,,PASS,as expected
+bank_error,ft,1793805199.658,CircuitBreakerOpen,999.0,1191.6,,PASS,as expected
+bank_error,ft,1793805199.658,HighErrorRate,999.0,1191.6,,PASS,as expected
+bank_error,ft,1793805199.658,HighLatencyP95,999.0,1191.6,,PASS,as expected
+bank_slow,ft,1793807505.167,HighLatencyP95,967.2,3066.6,,PASS,as expected
+normal_load,ft,1793811665.996,(none),,,,PASS,as expected
