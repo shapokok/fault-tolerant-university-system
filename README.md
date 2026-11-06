@@ -1,99 +1,118 @@
-# Fault-Tolerant University Information System
+# Resilient University Information System
 
-A small distributed university platform built twice: a **baseline** with no fault tolerance and a
-**fault-tolerant (FT)** version. Failures are injected, detection and recovery are measured, and
-reliability and availability are compared. All numbers come from real runs (`results/`).
+A small distributed university platform, built in two versions and compared with real measurements:
+
+- **baseline** (`docker-compose.baseline.yml`): one instance per service, no fault tolerance, no security
+  (the midterm baseline). Metrics, logs and alerts are on, so it can be measured the same way.
+- **endterm** (`docker-compose.ft.yml`): two instances per service, database replica, self-healing,
+  software fault tolerance (midterm), plus security: login, authorization, input validation, rate limits,
+  audit log, secrets in `.env`, least-privilege database role.
+
+All numbers in the reports come from real runs (`results/`). The midterm is on branch `main`; this branch
+(`endterm`) extends it.
 
 ## Stack
-Python 3.11, FastAPI, httpx, asyncpg, PostgreSQL 16 (primary + streaming replica), nginx, Docker Compose,
-Locust, pandas + matplotlib. One laptop, no Kubernetes.
+Python 3.11, FastAPI, httpx, asyncpg, PostgreSQL 16 (primary + streaming replica), nginx, Prometheus, Grafana,
+Docker Compose, Locust, pytest, pandas + matplotlib. One laptop, no Kubernetes.
 
 ## Services
 | Service | Role |
 |---|---|
-| gateway (nginx, `localhost:8080`) | single entry point, load balancer |
-| student-service | students, registrations, timetable (with cache) |
+| gateway (nginx, `localhost:8080`) | single entry point, load balancer; endterm: rate limits, header rules |
+| student-service | students, registrations, timetable (cache), login (`POST /auth/login`) |
 | transcript-service | transcripts (calls student-service), batch generation with checkpoints |
-| payment-service | tuition payments (calls mock-bank), idempotency, reconciliation |
-| mock-bank (`localhost:8090`) | fake bank with `POST /admin/fault {mode: none\|delay\|error\|crash_after_debit}` |
-| postgres-primary / postgres-replica | DB, streaming replication |
-| monitor | polls `/health` and `/ready` of every instance every 0.5 s, logs state changes |
-| backup (FT) | `pg_dump` every 60 s into `backups/` |
-
-One codebase (`services/`), behavior switched by `FT_MODE=off|on`.
-
-| | `docker-compose.baseline.yml` | `docker-compose.ft.yml` |
-|---|---|---|
-| Instances | 1 per service | 2 per service (instance 2 on "node-b") |
-| DB | primary only | primary + replica, `infra/failover.sh` |
-| Self-healing | none | `restart: unless-stopped`, healthchecks |
-| Software FT | none | timeouts, retry + backoff + jitter, circuit breakers, idempotency, transaction + reconciliation, checkpointing, `/ready` with dependencies, graceful degradation |
+| payment-service | payments (calls mock-bank), idempotency, reconciliation |
+| mock-bank (`localhost:8090`) | fake bank with `POST /admin/fault {mode: none\|delay\|error\|crash_after_debit}` (endterm: 127.0.0.1 only) |
+| postgres-primary / postgres-replica | database, streaming replication |
+| monitor | polls `/health` and `/ready` of every instance every 0.5 s |
+| prometheus (`localhost:9090`), grafana (`localhost:3000`) | metrics, 7 alert rules, dashboard (both modes) |
+| gateway-exporter (endterm) | counts the 429 answers nginx sends (`rate_limited_total`) |
+| backup (endterm) | `pg_dump` every 60 s into `backups/` |
 
 ## Requirements
-Docker Desktop (Compose v2) and `python3` with `pandas` and `matplotlib` (only for the analysis).
-Everything else runs in containers.
+- Docker Desktop (Compose v2).
+- `python3` on the machine for the scripts (standard library), `pandas` and `matplotlib` for the analysis.
+  `./run_tests.sh` creates its own `.venv-tests` with pytest.
+- For the endterm stack: a `.env` file with the secrets (never committed):
+  ```bash
+  cp .env.example .env
+  # put a new random value in every line, for example:
+  python3 -c "import secrets; print(secrets.token_urlsafe(32))"
+  ```
 
 ## Run
 ```bash
-# fault-tolerant version
+# endterm (fault tolerance + security)
 docker compose -f docker-compose.ft.yml up -d --build
-curl localhost:8080/timetable/1
-curl -X POST localhost:8080/payments -H 'content-type: application/json' \
-     -H 'Idempotency-Key: k1' -d '{"student_id":1,"amount":100}'
+TOKEN=$(cd experiments && python3 -c "import auth; print(auth.student_token(1))")   # login as student1
+curl -H "Authorization: Bearer $TOKEN" localhost:8080/timetable/1                 # 200
+curl localhost:8080/timetable/1                                                    # 401, no token
+curl -H "Authorization: Bearer $TOKEN" localhost:8080/students/2                  # 403, another student
 docker compose -f docker-compose.ft.yml down -v
 
-# baseline version (same commands with docker-compose.baseline.yml)
+# baseline (midterm behavior, no login)
+docker compose -f docker-compose.baseline.yml up -d --build
+curl localhost:8080/timetable/1
+docker compose -f docker-compose.baseline.yml down -v
 ```
-Only one stack can run at a time (both use ports 8080 and 8090).
+Only one stack can run at a time (both use ports 8080, 8090, 9090 and 3000).
 
-## Demo (3 scenarios)
+**Dashboard:** http://localhost:3000 (Grafana, no login; dashboard "University platform").
+**Alerts:** http://localhost:9090/alerts (Prometheus). Rules and responses: `docs/alerts.md`.
+
+## Demos
 ```bash
-./demo.sh ft all              # app_crash, db_failure, lost_transaction, pauses between steps
-./demo.sh baseline all        # same faults on the baseline, for comparison
-./demo.sh ft db_failure       # one scenario
-DEMO_FAST=1 ./demo.sh ft all  # no pauses
+./demo_endterm.sh             # endterm: unauthorized access, abusive requests, instance failure (alert fires and resolves)
+./demo_endterm.sh abusive     # one scenario: unauthorized | abusive | instance
+./demo.sh ft all              # midterm demo: app_crash, db_failure, lost_transaction (works on the endterm stack)
+./demo.sh baseline app_crash  # the same fault on the baseline
+DEMO_FAST=1 ./demo_endterm.sh # no pauses
 ```
-Each scenario starts a fresh stack, runs 20 req/s for 45 s, injects the fault at t=10 s and shows what the
-monitor saw, the workload result and the consistency check. About 1.5 min per scenario.
+`demo_endterm.sh` takes about 4 min: one fresh endterm stack, then the three scenarios with a pause before each.
 
-## Experiments
+## Tests
 ```bash
-python3 experiments/inject.py <scenario> <baseline|ft>  # one fault on a running stack
-python3 experiments/consistency_check.py <baseline|ft>  # money and transcripts correct?
-python3 experiments/run_all.py     # 6 scenarios x 2 modes, about 40 min (resumes; --fresh reruns all)
-python3 experiments/soak.py        # 20 min per mode, random fault every ~2 min (resumes)
+./run_tests.sh          # 75 unit tests (container) + 18 integration tests (fresh endterm stack), about 1.5 min
+./run_tests.sh --keep   # integration tests against the endterm stack that is already running
 ```
-Scenarios: `app_crash`, `db_failure`, `network_timeout`, `node_failure`, `lost_transaction`, `high_load`.
+Results: `results/endterm/tests_junit.xml`, `results/endterm/tests_summary.txt`; every test with its acceptance
+criterion and last result: `docs/test_plan.md`. Security checks with more detail: `python3 experiments/security_check.py`.
 
-## Analysis
+## Experiments and analysis
 ```bash
-python3 analysis/metrics.py    # tables, MTTF/MTBF/MTTR, RBD vs observed, plots
-python3 analysis/diagrams.py   # architecture.png, fault_tree.png
+python3 experiments/e5.py --plan     # the endterm series: runs and estimated time
+python3 experiments/e5.py            # 7 experiments x 2 modes (about 1.5 h, resumes if stopped)
+python3 experiments/e5_report.py     # results/endterm/summary.csv and experiments.md
+python3 analysis/prometheus_export.py   # one endterm session, dashboard panels as CSV
+python3 analysis/endterm.py          # comparison tables, analysis.md, plots (black and white friendly)
+python3 experiments/alert_test.py    # alert rules, one fault per rule (stage E2)
+python3 experiments/run_all.py       # midterm experiments; analysis/metrics.py for the midterm analysis
 ```
 
-## Results (90 s runs, 20 req/s)
-| Scenario | Availability baseline | Availability FT | Consistency baseline / FT |
-|---|---|---|---|
-| app_crash | 86.22% | 99.94% | FAIL / PASS |
-| db_failure | 66.33% | 90.44% | FAIL / PASS |
-| network_timeout | 95.39% | 92.00% | FAIL / PASS |
-| node_failure | 22.33% | 100.00% | FAIL / PASS |
-| lost_transaction | 92.78% | 92.78% | FAIL / PASS |
-| high_load | 100.00% | 100.00% | FAIL / PASS |
+## Results (endterm, mean of the valid E5 runs)
+| Experiment | Baseline | Endterm |
+|---|---|---|
+| Instance crash (kill -9) | 83.9% success, not recovered | 100.0%, recovered at once |
+| Slow bank (5 s for 30 s) | 93.6%, money taken for failed payments | 90.7%, money consistent |
+| Slow DB (tables locked 30 s) | 79.8% | 81.6% (retry budget too long, see analysis) |
+| Load spike, 300 users from one IP | 100% | 84.5% of all, 100% of requests that passed the rate limit |
+| Unauthorized access (80 attempts) | 80 succeeded | 80 refused, 80 audit rows, data unchanged |
+| Abusive requests (2500) | 22 answered 5xx | 0 answered 5xx, normal users 100% |
+| Alert test | 4 of 4 rules as expected | 7 of 7 rules as expected, 0 alerts in 5 min of normal load |
 
-Soak (20 min, same 10 faults): baseline 36.7% availability, FT 97.3% (MTTF 173 s, MTTR 27 s).
-RBD theoretical availability: FT 0.972 vs observed 0.973; baseline 0.773 vs observed 0.367.
-Explanations, including why FT is lower in `network_timeout`: `docs/DEFENSE_NOTES.md`.
+Full tables, discussion and lessons learned: `results/endterm/analysis.md`, per experiment:
+`results/endterm/experiments.md`, plots: `results/endterm/plots/`.
 
 ## Where things are
 | Path | Content |
 |---|---|
-| `services/` | all service code; `ft.py` = retry, circuit breaker, timeouts |
-| `gateway/` | nginx configs (baseline, FT) |
-| `db/init/` | schema, seed data (50 students, 10 courses), replication role |
-| `infra/` | `failover.sh`, `backup.sh`, `restore.sh`, replica entrypoint |
-| `experiments/` | workload, injection, consistency check, run_all, soak, Locust |
-| `analysis/` | metrics and diagrams |
-| `results/` | `experiments.csv`, `before_after.md`, `soak_*.csv`, `rbd.csv`, `raw/`, `plots/` |
-| `docs/DEFENSE_NOTES.md` | what was built in every stage, which function does what, real results, how to demo |
-| `docs/hardware_ft.md` | RAID and ECC (documentation only) |
+| `services/` | service code; `obs.py` metrics, logs, request IDs; `security.py` login, tokens, authorization, audit; `ft.py` retry, circuit breaker |
+| `gateway/` | nginx configs (baseline, endterm), JSON access log |
+| `prometheus/`, `grafana/` | scrape configs, alert rules and their tests, provisioned dashboard |
+| `db/init/` | schema, seed data, replication role, endterm security objects (`03_security.sh`) |
+| `infra/` | failover, backup, restore, replica entrypoint |
+| `experiments/` | workload, fault injection, alert watcher and tests, security check, E5 runner, demos |
+| `tests/` | unit and integration tests, report generator |
+| `analysis/` | midterm and endterm analysis, Prometheus export |
+| `results/` | midterm results; `results/endterm/` for the endterm |
+| `docs/` | `DEFENSE_NOTES.md` (every stage), `alerts.md`, `threat_model.md`, `test_plan.md`, `hardware_ft.md` |

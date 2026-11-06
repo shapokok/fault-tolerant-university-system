@@ -1,0 +1,41 @@
+
+== Start a fresh endterm stack (about 40 s)
+   Grafana: http://localhost:3000   Prometheus alerts: http://localhost:9090/alerts
+
+== Scenario 1: unauthorized access
+   student1 logs in; then: no token, a forged token, and student1 asking for student 2's data and an admin action
+   no token                                         -> 401
+   forged admin token                               -> 401
+   student1 reads student 2                         -> 403
+   student1 pays for student 2                      -> 403
+   student1 starts batch transcripts (admin only)   -> 403
+   student1 reads own record                        -> 200
+
+== Audit log (written by the services, the app role can only INSERT there)
+   audit: 20:15:32 |  | access | denied: missing_token | 192.168.65.1
+   audit: 20:15:32 |  | access | denied: invalid_token | 192.168.65.1
+   audit: 20:15:32 | student1 | access | denied: forbidden | 192.168.65.1
+   audit: 20:15:32 | student1 | access | denied: forbidden | 192.168.65.1
+   audit: 20:15:32 | student1 | access | denied: forbidden | 192.168.65.1
+   payments and grades checksum unchanged: True
+
+== Scenario 2: abusive requests while normal users work
+   workload 20 req/s from its own container; this machine sends 200 malformed requests and 2 bursts of 500
+   200 malformed requests: {401: 1, 413: 31, 422: 106, 429: 62}  (5xx: 0)
+   500 logins at once:     {401: 1, 429: 499}
+   500 payments at once:   {201: 6, 429: 494}
+   watch Grafana: 429 line and RateLimitSpike
+   normal users (workload): 1200 requests, 100.0% ok, p95 17.3 ms
+   integrity: PASS (all checks passed)
+
+== Scenario 3: instance failure (docker stop payment-service-1 for 30 s)
+   InstanceDown needs the instance gone for 10 s; watch Grafana: Instances up and Alert history
+   01:17:05 payment-service-1 stopped
+   +  2.3 s  InstanceDown (payment-service-1): pending
+   + 12.3 s  InstanceDown (payment-service-1): firing
+   01:17:36 payment-service-1 started again
+   + 32.6 s  InstanceDown (payment-service-1): resolved
+   + 32.6 s  InstanceRestarted (payment-service-1): firing
+   normal users (workload): 2200 requests, 99.9% ok, p95 17.8 ms
+
+== Done. Stop with: docker compose -f docker-compose.ft.yml down -v

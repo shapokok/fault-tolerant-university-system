@@ -883,3 +883,34 @@ python3 experiments/e5_report.py && open results/endterm/experiments.md
 | 7 | E3 | 401/403 flood: AuthFailureSpike, auth failures by reason |
 | 8 | E3 | Rate limit flood: 429, RateLimitSpike |
 | 9 | E5 | Load spike at 300 users: payments capped at about 20/s, 429, RateLimitSpike, 0 5xx |
+
+## Stage E7: Demo and README
+
+### What was built
+- `demo_endterm.sh` (wrapper) and `experiments/demo_endterm.py`: one fresh endterm stack, then three scenarios with a
+  pause before each (`DEMO_FAST=1` removes the pauses, `./demo_endterm.sh abusive` runs one):
+  1. **unauthorized_access**: no token 401, forged token 401, student1 reading or paying for student 2 403, student1
+     calling an admin endpoint 403, own record 200; the audit rows of these requests are printed (times in UTC);
+     payments and grades checksum unchanged.
+  2. **abusive_requests**: normal workload from its own container while this machine sends 200 malformed requests
+     and two bursts of 500 (login, payments); prints the status counts, the normal users' result and the
+     integrity check.
+  3. **instance_failure**: `docker stop payment-service-1` for 30 s (the alert fault agreed in E2), the alert states
+     are printed as they change: InstanceDown pending, firing, resolved.
+- `README.md`: both modes, `.env` setup, demos, tests, experiments, analysis, dashboard and alert URLs, results.
+
+### Verified run (2026-11-07, `results/endterm/e7_demo_output.txt`)
+| Scenario | Result |
+|---|---|
+| unauthorized_access | 401, 401, 403, 403, 403, own record 200; 5 audit rows; checksum unchanged: True |
+| abusive_requests | 200 malformed: 0 answered 5xx (422, 413, 429, one 401); 500 logins: 499 x 429; 500 payments: 494 x 429; normal users 1200 requests, 100.0% ok, p95 17.3 ms; integrity PASS |
+| instance_failure | InstanceDown pending +2.3 s, firing +12.3 s, resolved +32.6 s (started again at +30 s); InstanceRestarted fired after the start; normal users 99.9% ok |
+
+### How to demo at the defense
+```bash
+./demo_endterm.sh                 # about 4 min; open http://localhost:3000 next to it
+./demo.sh baseline app_crash      # optional contrast: the baseline does not recover
+```
+Talking points, in order: no token or another student's data is refused and audited; floods are cut at the
+gateway (429) while normal users keep 100%; an instance outage is detected by an alert within about 12 s and the
+alert resolves when the instance is back, while users do not notice.
