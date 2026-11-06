@@ -608,7 +608,11 @@ python3 experiments/alert_test.py --cases instance_crash --modes ft   # one meas
 docker run --rm --entrypoint promtool -v "$PWD/prometheus:/p:ro" -w /p prom/prometheus:v2.55.1 test rules alerts_test.yml
 ```
 
-### Open question for E3
-Replays of failed payments return 502 and count as server errors (see findings). Options: keep and document;
-return 409 for a replay of a failed payment; or label replays separately (`source="replay"`) so the error rate
-and HighErrorRate count only new requests, while the response itself stays the original result.
+### Decision after E2: replays get their own label
+Replays of failed payments returned 502 and counted as new server errors (see findings). Chosen fix: the
+response stays the original result (still 502), but `payment.replay()` adds `X-Replayed: 1`, and the middleware in
+`common.create_app()` counts such responses with `source="replay"`. HighErrorRate and the error rate count only
+`source="user"`; replays are separate series on the "Requests" and "Error rate" panels, so nothing is hidden.
+Check (`results/endterm/e2_replay_check.txt`): bank error for 30 s, then 100 s healthy. HighErrorRate fired during
+the fault and resolved, with no new firing afterwards. In the last 60 s: 0 user 5xx, 9 replayed 502 out of 26 replays
+(before the fix these would have been 3.7% of payment requests, close to the 5% threshold).

@@ -66,7 +66,9 @@ def replay(row):
     body = {"payment_id": row["id"], "status": row["status"], "bank_ref": row["bank_ref"], "replayed": True}
     code = {"completed": 200, "pending": 202}.get(row["status"], 502)
     obs.PAYMENTS.labels(status="replayed").inc()
-    return JSONResponse(body, status_code=code)
+    # X-Replayed: the metrics count this response with source="replay", so a replayed failure
+    # (502) is visible on the dashboard but not counted as a new server error by HighErrorRate.
+    return JSONResponse(body, status_code=code, headers={"X-Replayed": "1"})
 
 
 @app.post("/payments", status_code=201)

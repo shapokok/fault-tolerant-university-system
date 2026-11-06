@@ -116,7 +116,8 @@ NOT_LOGGED = {"/health", "/ready", "/metrics"}
 
 
 def record_request(method, path, endpoint, status, seconds, source="user"):
-    """source is "probe" for calls made by a /ready check (header X-Probe: 1), else "user"."""
+    """source: "probe" for calls made by a /ready check (header X-Probe: 1), "replay" for a duplicate
+    payment answered with its stored result, else "user". Alerts count only "user"."""
     HTTP_REQUESTS.labels(service=SERVICE, instance=INSTANCE, endpoint=endpoint, method=method,
                          status=str(status), source=source).inc()
     HTTP_DURATION.labels(service=SERVICE, endpoint=endpoint, source=source).observe(seconds)

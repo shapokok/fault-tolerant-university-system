@@ -130,6 +130,8 @@ def create_app(name, use_db=True, deps=None, breakers=()):
             response = JSONResponse({"detail": "internal server error"}, status_code=500)
         route = request.scope.get("route")  # the template (/students/{sid}), so labels stay few
         source = "probe" if request.headers.get("x-probe") == "1" else "user"
+        if response.headers.get("x-replayed") == "1":
+            source = "replay"  # duplicate payment answered with the stored result
         obs.record_request(request.method, request.url.path, route.path if route else "unmatched",
                            response.status_code, obs.now() - start, source)
         response.headers["X-Request-ID"] = rid

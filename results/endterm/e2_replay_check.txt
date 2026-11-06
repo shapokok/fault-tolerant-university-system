@@ -1,0 +1,7 @@
+bank error from t=20 s to t=50 s; alert poll gap max 1.0 s
+  HighErrorRate payment-service  firing    at t=  27.2 s
+  HighErrorRate mock-bank        firing    at t=  27.2 s
+  HighErrorRate mock-bank        resolved  at t=  77.5 s
+  HighErrorRate payment-service  resolved  at t=  86.6 s
+last 60 s of the run (t=85..145 s, bank healthy for 35 s or more), payment-service /payments:
+  5xx by source: {'user': 0, 'replay': 9}   all requests by source: {'user': 218, 'replay': 26}

@@ -2,7 +2,7 @@
   "uid": "university",
   "title": "University platform",
   "schemaVersion": 39,
-  "version": 3,
+  "version": 4,
   "editable": false,
   "refresh": "5s",
   "time": {
@@ -52,12 +52,21 @@
           },
           "expr": "sum by (service) (rate(http_requests_total{endpoint!~\"/health|/ready|/metrics\",source=\"probe\"}[30s]))",
           "legendFormat": "{{service}} (probes)"
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum by (service) (rate(http_requests_total{endpoint!~\"/health|/ready|/metrics\",source=\"replay\"}[30s]))",
+          "legendFormat": "{{service}} (replays)"
         }
       ]
     },
     {
       "id": 2,
-      "title": "Error rate % (5xx), per service",
+      "title": "Error rate % (5xx), per service; replayed failures shown separately",
       "type": "timeseries",
       "datasource": {
         "type": "prometheus",
@@ -85,6 +94,15 @@
           },
           "expr": "(100 * sum by (service) (rate(http_requests_total{endpoint!~\"/health|/ready|/metrics\",source=\"user\",status=~\"5..\"}[30s])) / sum by (service) (rate(http_requests_total{endpoint!~\"/health|/ready|/metrics\",source=\"user\"}[30s]))) or (sum by (service) (rate(http_requests_total{endpoint!~\"/health|/ready|/metrics\",source=\"user\"}[30s])) * 0)",
           "legendFormat": "{{service}}"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "100 * sum by (service) (rate(http_requests_total{endpoint!~\"/health|/ready|/metrics\",source=\"replay\",status=~\"5..\"}[30s])) / sum by (service) (rate(http_requests_total{endpoint!~\"/health|/ready|/metrics\",source=~\"user|replay\"}[30s]))",
+          "legendFormat": "{{service}} replayed failures (not alerted)"
         }
       ]
     },

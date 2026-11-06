@@ -4,8 +4,14 @@ Rules: `prometheus/alerts.yml`. Prometheus scrapes every 2 s and evaluates the r
 `experiments/alert_watch.py` polls `/api/v1/alerts` every 1 s and writes every state change
 (pending, firing, resolved) to `results/endterm/alerts_<run>.csv`.
 
-Request-based rules only count real traffic: `source="user"` (calls made by `/ready` checks carry
-`X-Probe: 1` and are labeled `source="probe"`), and `/health`, `/ready`, `/metrics` are excluded.
+Request-based rules only count new user traffic, `source="user"`. Excluded:
+- `source="probe"`: calls made by `/ready` checks (header `X-Probe: 1`).
+- `source="replay"`: a duplicate payment (same Idempotency-Key) answered with its stored result. The response
+  itself is unchanged (a replayed failure is still 502), only the metric label differs. Replays stay visible as
+  separate series on the dashboard ("Requests" and "Error rate" panels), so nothing is hidden. Reason: after a
+  bank fault the workload keeps resending some failed keys, and their 502 made HighErrorRate fire with no new
+  failure (twice in the E2 screenshot session).
+- `/health`, `/ready`, `/metrics`.
 
 | Alert | What it detects | Rule and threshold | Why this threshold | Expected response | How it is tested |
 |---|---|---|---|---|---|

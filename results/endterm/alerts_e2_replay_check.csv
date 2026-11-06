@@ -1,0 +1,11 @@
+ts,alertname,instance,service,target,state
+1793984598.439,HighErrorRate,,payment-service,,firing
+1793984598.439,HighErrorRate,,mock-bank,,firing
+1793984598.439,CircuitBreakerOpen,payment-service-1,payment-service,mock-bank,firing
+1793984598.439,CircuitBreakerOpen,payment-service-2,payment-service,mock-bank,firing
+1793984618.587,CircuitBreakerOpen,payment-service-1,payment-service,mock-bank,resolved
+1793984623.627,CircuitBreakerOpen,payment-service-1,payment-service,mock-bank,firing
+1793984628.664,CircuitBreakerOpen,payment-service-2,payment-service,mock-bank,resolved
+1793984633.702,CircuitBreakerOpen,payment-service-1,payment-service,mock-bank,resolved
+1793984648.79,HighErrorRate,,mock-bank,,resolved
+1793984657.859,HighErrorRate,,payment-service,,resolved
