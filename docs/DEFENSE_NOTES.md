@@ -914,3 +914,5 @@ python3 experiments/e5_report.py && open results/endterm/experiments.md
 Talking points, in order: no token or another student's data is refused and audited; floods are cut at the
 gateway (429) while normal users keep 100%; an instance outage is detected by an alert within about 12 s and the
 alert resolves when the instance is back, while users do not notice.
+
+**Fix after E5 (user_id in service access logs):** found while collecting log samples, fixed after E5, does not affect any measurement. The access log line is written by the middleware after the endpoint, so the user set during the token check was not visible there and `user_id` was null; now the middleware puts a box in the request context that the token check fills (`obs.set_user()`), covered by `test_user_id_in_service_logs` (`./run_tests.sh`: 94 of 94 passed).

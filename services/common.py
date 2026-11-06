@@ -125,6 +125,7 @@ def create_app(name, use_db=True, deps=None, breakers=()):
         obs.request_id.set(rid)
         box = {"retries": 0}
         ft.retry_box.set(box)
+        obs.user_box.set({"user": None})  # filled by the token check, read by the access log line
         start = obs.now()
         try:
             response = await call_next(request)

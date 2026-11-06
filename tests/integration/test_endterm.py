@@ -122,6 +122,18 @@ def test_x_probe_cannot_hide_traffic(student1):
     assert all(rid in logs for rid in rids), "requests with X-Probe are missing from the gateway log"
 
 
+def test_user_id_in_service_logs(student1):
+    """The access log line of an authenticated request carries the user (student1) in every service it passes."""
+    rid = "itest-" + uuid.uuid4().hex
+    assert call("GET", "/transcripts/1", token=student1, headers={"X-Request-ID": rid})[0] == 200
+    time.sleep(1)
+    logs = subprocess.run(COMPOSE + ["logs", "--no-color", "--no-log-prefix", "transcript-service-1", "transcript-service-2",
+                                     "student-service-1", "student-service-2"], cwd=ROOT, capture_output=True, text=True).stdout
+    lines = [json.loads(line) for line in logs.splitlines() if rid in line and '"http_request"' in line]
+    assert {entry["service"] for entry in lines} == {"transcript-service", "student-service"}
+    assert all(entry["user_id"] == "student1" for entry in lines), [entry["user_id"] for entry in lines]
+
+
 def test_bad_request_id_is_replaced():
     """A client X-Request-ID that is not 1 to 64 safe characters is replaced by a new ID."""
     req = urllib.request.Request("http://localhost:8080/health", headers={"X-Request-ID": "bad id $(x)"})

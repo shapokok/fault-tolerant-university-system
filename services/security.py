@@ -76,7 +76,7 @@ async def current_user(request: Request):
         await deny(request, 401, "expired_token")
     except jwt.InvalidTokenError:
         await deny(request, 401, "invalid_token")
-    obs.user_id.set(claims["sub"])
+    obs.set_user(claims["sub"])
     return claims
 
 
@@ -142,7 +142,7 @@ async def login(request, username, password):
         await deny(request, 401, "bad_password" if user else "unknown_user", action="login",
                    detail="invalid username or password", user_id=username)
     await common.execute("UPDATE users SET failed_logins = 0, locked_until = NULL WHERE id = $1", user["id"])
-    obs.user_id.set(username)
+    obs.set_user(username)
     await audit(request, "login", username, "success")
     return {"access_token": create_token(username, user["role"], user["student_id"]),
             "token_type": "bearer", "expires_in": TOKEN_TTL_S}
@@ -159,7 +159,7 @@ async def audit(request, action, resource, result, user_id=None):
     if not ON:
         return
     import common
-    user_id = user_id or obs.user_id.get()
+    user_id = user_id or obs.current_user_id()
     ip = client_ip(request)
     level = logging.WARNING if result.startswith(("denied", "failed")) else logging.INFO
     obs.log("audit", f"{action} {resource}: {result}", level=level, user_id=user_id, action=action,

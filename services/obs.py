@@ -48,6 +48,22 @@ def set_breaker_state(target, state):
 
 request_id = contextvars.ContextVar("request_id", default=None)
 user_id = contextvars.ContextVar("user_id", default=None)  # filled from stage E3
+# The request's access log line is written by the middleware after the endpoint has run. A value
+# set with user_id.set() inside the endpoint is not visible there, so the middleware also puts a
+# mutable box in the context and the token check writes the user into it.
+user_box = contextvars.ContextVar("user_box", default=None)
+
+
+def set_user(name):
+    user_id.set(name)
+    box = user_box.get()
+    if box is not None:
+        box["user"] = name
+
+
+def current_user_id():
+    box = user_box.get()
+    return user_id.get() or (box or {}).get("user")
 VALID_ID = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
 
 
@@ -76,7 +92,7 @@ class JsonFormatter(logging.Formatter):
             "path": None,
             "status": None,
             "latency_ms": None,
-            "user_id": user_id.get(),
+            "user_id": current_user_id(),
             "event": "log",
             "message": record.getMessage(),
         }
