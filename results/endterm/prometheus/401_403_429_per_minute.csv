@@ -1,0 +1,351 @@
+ts,t_s,series,value,query
+1793995439.234,154.0,401,3.352737680151387,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995441.234,156.0,401,5.405796159619714,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995443.234,158.0,401,7.386606165461938,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995445.234,160.0,401,9.37849882994962,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995447.234,162.0,401,11.375084859924872,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995449.234,164.0,401,13.369180627563754,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995451.234,166.0,401,15.352526362792027,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995453.234,168.0,401,17.351501002808774,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995455.234,170.0,401,19.350994056638868,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995457.234,172.0,401,21.351506100305016,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995459.234,174.0,401,23.362197068195247,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995461.234,176.0,401,25.36156713734506,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995463.234,178.0,401,27.35821184169265,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995465.234,180.0,401,29.36787403148329,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995467.234,182.0,401,29.277626233188023,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995469.234,184.0,401,29.197395149696852,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995471.234,186.0,401,29.12636060275215,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995473.234,188.0,401,29.063448981733554,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995475.234,190.0,401,29.006943374978434,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995477.234,192.0,401,28.957200161619625,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995479.234,194.0,401,28.910756948399296,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995481.234,196.0,401,28.870368211055716,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995483.234,198.0,401,28.832966272635673,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995485.234,200.0,401,28.798173705167915,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995487.234,202.0,401,28.766328253130126,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995489.234,204.0,401,28.736853784317148,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995491.234,206.0,401,28.710160327302095,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995493.234,208.0,401,28.683283875317834,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995495.234,210.0,401,28.965588637911573,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995497.234,212.0,401,26.89535677323532,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995499.234,214.0,401,24.827586206896555,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995501.234,216.0,401,22.758442333633962,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995503.234,218.0,401,20.69004757595684,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995505.234,220.0,401,18.61965525174617,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995507.234,222.0,401,16.551206942983576,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995509.234,224.0,401,14.48266944267905,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995511.234,226.0,401,12.414221187421703,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995513.234,228.0,401,10.344952439726963,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995515.234,230.0,401,8.275576711631444,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995517.234,232.0,401,6.206753868137168,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995519.234,234.0,401,4.137699182724796,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995521.234,236.0,401,2.0689298460371375,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995523.234,238.0,401,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995525.234,240.0,401,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995527.234,242.0,401,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995529.234,244.0,401,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995531.234,246.0,401,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995533.234,248.0,401,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995535.234,250.0,401,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995537.234,252.0,401,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995539.234,254.0,401,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995541.234,256.0,401,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995543.234,258.0,401,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995545.234,260.0,401,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995547.234,262.0,401,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995549.234,264.0,401,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995551.234,266.0,401,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995553.234,268.0,401,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995555.234,270.0,401,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995557.234,272.0,401,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995559.234,274.0,401,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995561.234,276.0,401,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995563.234,278.0,401,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995565.234,280.0,401,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995567.234,282.0,401,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995569.234,284.0,401,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995571.234,286.0,401,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995573.234,288.0,401,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995575.234,290.0,401,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995577.234,292.0,401,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995579.234,294.0,401,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995581.234,296.0,401,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995583.234,298.0,401,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995585.234,300.0,401,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995587.234,302.0,401,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995589.234,304.0,401,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995591.234,306.0,401,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995593.234,308.0,401,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995595.234,310.0,401,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995597.234,312.0,401,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995599.234,314.0,401,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995601.234,316.0,401,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995603.234,318.0,401,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995605.234,320.0,401,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995607.234,322.0,401,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995609.234,324.0,401,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995611.234,326.0,401,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995613.234,328.0,401,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995615.234,330.0,401,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995617.234,332.0,401,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995619.234,334.0,401,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995439.234,154.0,403,3.352737680151387,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995441.234,156.0,403,5.299388478859145,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995443.234,158.0,403,7.316364613496352,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995445.234,160.0,403,9.352017520881041,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995447.234,162.0,403,11.332081180665462,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995449.234,164.0,403,13.351009085770896,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995451.234,166.0,403,15.367736882393164,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995453.234,168.0,403,17.351501002808774,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995455.234,170.0,403,19.33910733437996,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995457.234,172.0,403,21.34075671033552,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995459.234,174.0,403,23.35251677501477,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995461.234,176.0,403,25.36156713734506,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995463.234,178.0,403,27.349982424428887,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995465.234,180.0,403,29.344838432064563,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995467.234,182.0,403,29.256125619895812,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995469.234,184.0,403,29.17714388399275,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995471.234,186.0,403,29.10756840049901,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995473.234,188.0,403,29.045616782722497,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995475.234,190.0,403,28.990288912395677,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995477.234,192.0,403,28.9415292005746,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995479.234,194.0,403,28.89561647897721,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995481.234,196.0,403,28.855846627456007,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995483.234,198.0,403,28.81887870361093,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995485.234,200.0,403,28.784799067194665,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995487.234,202.0,403,28.753367734709386,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995489.234,204.0,403,28.724391766547235,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995491.234,206.0,403,28.69804781483394,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995493.234,208.0,403,28.671981884253004,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995495.234,210.0,403,28.965856181169336,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995497.234,212.0,403,26.895410276351782,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995499.234,214.0,403,24.827586206896555,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995501.234,216.0,403,22.758424498031843,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995503.234,218.0,403,20.689976229858104,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995505.234,220.0,403,18.619726588004976,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995507.234,222.0,403,16.55138529285511,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995509.234,224.0,403,14.482598100270565,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995511.234,226.0,403,12.414060655931667,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995513.234,228.0,403,10.34491676729266,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995515.234,230.0,403,8.275719393988542,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995517.234,232.0,403,6.206718198162926,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995519.234,234.0,403,4.137859692074275,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995521.234,236.0,403,2.069036863340115,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995523.234,238.0,403,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995525.234,240.0,403,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995527.234,242.0,403,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995529.234,244.0,403,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995531.234,246.0,403,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995533.234,248.0,403,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995535.234,250.0,403,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995537.234,252.0,403,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995539.234,254.0,403,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995541.234,256.0,403,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995543.234,258.0,403,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995545.234,260.0,403,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995547.234,262.0,403,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995549.234,264.0,403,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995551.234,266.0,403,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995553.234,268.0,403,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995555.234,270.0,403,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995557.234,272.0,403,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995559.234,274.0,403,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995561.234,276.0,403,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995563.234,278.0,403,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995565.234,280.0,403,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995567.234,282.0,403,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995569.234,284.0,403,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995571.234,286.0,403,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995573.234,288.0,403,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995575.234,290.0,403,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995577.234,292.0,403,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995579.234,294.0,403,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995581.234,296.0,403,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995583.234,298.0,403,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995585.234,300.0,403,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995587.234,302.0,403,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995589.234,304.0,403,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995591.234,306.0,403,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995593.234,308.0,403,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995595.234,310.0,403,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995597.234,312.0,403,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995599.234,314.0,403,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995601.234,316.0,403,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995603.234,318.0,403,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995605.234,320.0,403,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995607.234,322.0,403,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995609.234,324.0,403,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995611.234,326.0,403,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995613.234,328.0,403,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995615.234,330.0,403,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995617.234,332.0,403,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995619.234,334.0,403,0,"sum by (status) (increase(http_requests_total{source=""user"",status=~""401|403""}[1m]))"
+1793995285.234,0.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995287.234,2.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995289.234,4.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995291.234,6.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995293.234,8.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995295.234,10.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995297.234,12.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995299.234,14.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995301.234,16.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995303.234,18.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995305.234,20.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995307.234,22.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995309.234,24.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995311.234,26.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995313.234,28.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995315.234,30.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995317.234,32.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995319.234,34.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995321.234,36.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995323.234,38.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995325.234,40.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995327.234,42.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995329.234,44.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995331.234,46.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995333.234,48.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995335.234,50.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995337.234,52.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995339.234,54.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995341.234,56.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995343.234,58.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995345.234,60.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995347.234,62.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995349.234,64.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995351.234,66.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995353.234,68.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995355.234,70.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995357.234,72.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995359.234,74.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995361.234,76.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995363.234,78.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995365.234,80.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995367.234,82.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995369.234,84.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995371.234,86.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995373.234,88.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995375.234,90.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995377.234,92.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995379.234,94.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995381.234,96.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995383.234,98.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995385.234,100.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995387.234,102.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995389.234,104.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995391.234,106.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995393.234,108.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995395.234,110.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995397.234,112.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995399.234,114.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995401.234,116.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995403.234,118.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995405.234,120.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995407.234,122.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995409.234,124.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995411.234,126.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995413.234,128.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995415.234,130.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995417.234,132.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995419.234,134.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995421.234,136.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995423.234,138.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995425.234,140.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995427.234,142.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995429.234,144.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995431.234,146.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995433.234,148.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995435.234,150.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995437.234,152.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995439.234,154.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995441.234,156.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995443.234,158.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995445.234,160.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995447.234,162.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995449.234,164.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995451.234,166.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995453.234,168.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995455.234,170.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995457.234,172.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995459.234,174.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995461.234,176.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995463.234,178.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995465.234,180.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995467.234,182.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995469.234,184.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995471.234,186.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995473.234,188.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995475.234,190.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995477.234,192.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995479.234,194.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995481.234,196.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995483.234,198.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995485.234,200.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995487.234,202.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995489.234,204.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995491.234,206.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995493.234,208.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995495.234,210.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995497.234,212.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995499.234,214.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995501.234,216.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995503.234,218.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995505.234,220.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995507.234,222.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995509.234,224.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995511.234,226.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995513.234,228.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995515.234,230.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995517.234,232.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995519.234,234.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995521.234,236.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995523.234,238.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995525.234,240.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995527.234,242.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995529.234,244.0,429 (rate limited at the gateway),25.275841294431533,sum(increase(rate_limited_total[1m]))
+1793995531.234,246.0,429 (rate limited at the gateway),65.71831858711744,sum(increase(rate_limited_total[1m]))
+1793995533.234,248.0,429 (rate limited at the gateway),106.15853343661244,sum(increase(rate_limited_total[1m]))
+1793995535.234,250.0,429 (rate limited at the gateway),142.5581987812855,sum(increase(rate_limited_total[1m]))
+1793995537.234,252.0,429 (rate limited at the gateway),184.01129204392882,sum(increase(rate_limited_total[1m]))
+1793995539.234,254.0,429 (rate limited at the gateway),224.44951285847077,sum(increase(rate_limited_total[1m]))
+1793995541.234,256.0,429 (rate limited at the gateway),264.8954761412931,sum(increase(rate_limited_total[1m]))
+1793995543.234,258.0,429 (rate limited at the gateway),305.3375335674447,sum(increase(rate_limited_total[1m]))
+1793995545.234,260.0,429 (rate limited at the gateway),346.79051192894275,sum(increase(rate_limited_total[1m]))
+1793995547.234,262.0,429 (rate limited at the gateway),387.2326269946465,sum(increase(rate_limited_total[1m]))
+1793995549.234,264.0,429 (rate limited at the gateway),427.67459634385654,sum(increase(rate_limited_total[1m]))
+1793995551.234,266.0,429 (rate limited at the gateway),469.1276896064998,sum(increase(rate_limited_total[1m]))
+1793995553.234,268.0,429 (rate limited at the gateway),509.5609604957397,sum(increase(rate_limited_total[1m]))
+1793995555.234,270.0,429 (rate limited at the gateway),550.0117740214135,sum(increase(rate_limited_total[1m]))
+1793995557.234,272.0,429 (rate limited at the gateway),566.1885909043963,sum(increase(rate_limited_total[1m]))
+1793995559.234,274.0,429 (rate limited at the gateway),566.1788449952663,sum(increase(rate_limited_total[1m]))
+1793995561.234,276.0,429 (rate limited at the gateway),566.178951354701,sum(increase(rate_limited_total[1m]))
+1793995563.234,278.0,429 (rate limited at the gateway),566.1788449952663,sum(increase(rate_limited_total[1m]))
+1793995565.234,280.0,429 (rate limited at the gateway),566.178951354701,sum(increase(rate_limited_total[1m]))
+1793995567.234,282.0,429 (rate limited at the gateway),566.1788449952663,sum(increase(rate_limited_total[1m]))
+1793995569.234,284.0,429 (rate limited at the gateway),566.1692056114985,sum(increase(rate_limited_total[1m]))
+1793995571.234,286.0,429 (rate limited at the gateway),566.1690994216469,sum(increase(rate_limited_total[1m]))
+1793995573.234,288.0,429 (rate limited at the gateway),566.1690994216469,sum(increase(rate_limited_total[1m]))
+1793995575.234,290.0,429 (rate limited at the gateway),566.1788449952663,sum(increase(rate_limited_total[1m]))
+1793995577.234,292.0,429 (rate limited at the gateway),566.1886974334258,sum(increase(rate_limited_total[1m]))
+1793995579.234,294.0,429 (rate limited at the gateway),566.178951354701,sum(increase(rate_limited_total[1m]))
+1793995581.234,296.0,429 (rate limited at the gateway),566.178951354701,sum(increase(rate_limited_total[1m]))
+1793995583.234,298.0,429 (rate limited at the gateway),566.1594602038007,sum(increase(rate_limited_total[1m]))
+1793995585.234,300.0,429 (rate limited at the gateway),566.1496092808703,sum(increase(rate_limited_total[1m]))
+1793995587.234,302.0,429 (rate limited at the gateway),553.448275862069,sum(increase(rate_limited_total[1m]))
+1793995589.234,304.0,429 (rate limited at the gateway),512.0601368941914,sum(increase(rate_limited_total[1m]))
+1793995591.234,306.0,429 (rate limited at the gateway),470.68153997344876,sum(increase(rate_limited_total[1m]))
+1793995593.234,308.0,429 (rate limited at the gateway),433.4408027447802,sum(increase(rate_limited_total[1m]))
+1793995595.234,310.0,429 (rate limited at the gateway),391.020999275887,sum(increase(rate_limited_total[1m]))
+1793995597.234,312.0,429 (rate limited at the gateway),349.65517241379314,sum(increase(rate_limited_total[1m]))
+1793995599.234,314.0,429 (rate limited at the gateway),308.27054705953344,sum(increase(rate_limited_total[1m]))
+1793995601.234,316.0,429 (rate limited at the gateway),266.88734871211335,sum(increase(rate_limited_total[1m]))
+1793995603.234,318.0,429 (rate limited at the gateway),224.47501810282404,sum(increase(rate_limited_total[1m]))
+1793995605.234,320.0,429 (rate limited at the gateway),183.10029137428663,sum(increase(rate_limited_total[1m]))
+1793995607.234,322.0,429 (rate limited at the gateway),141.71925106030827,sum(increase(rate_limited_total[1m]))
+1793995609.234,324.0,429 (rate limited at the gateway),99.3000724063028,sum(increase(rate_limited_total[1m]))
+1793995611.234,326.0,429 (rate limited at the gateway),57.931034482758626,sum(increase(rate_limited_total[1m]))
+1793995613.234,328.0,429 (rate limited at the gateway),16.551153408503154,sum(increase(rate_limited_total[1m]))
+1793995615.234,330.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995617.234,332.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))
+1793995619.234,334.0,429 (rate limited at the gateway),0,sum(increase(rate_limited_total[1m]))

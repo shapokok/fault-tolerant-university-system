@@ -1,0 +1,9 @@
+experiment,success_baseline,p95_ms_baseline,detection_s_baseline,alert_s_baseline,recovery_s_baseline,attacks_refused_baseline,attacks_5xx_baseline,attacks_succeeded_baseline,integrity_baseline,alerts_ok_baseline,runs_baseline,success_endterm,p95_ms_endterm,detection_s_endterm,alert_s_endterm,recovery_s_endterm,attacks_refused_endterm,attacks_5xx_endterm,attacks_succeeded_endterm,integrity_endterm,alerts_ok_endterm,runs_endterm
+Instance crash (kill -9),0.8387,10003.65,0.265,15.95,not recovered,,,,0/2,2/2,2,1.0,16.35,0.11,4.85,0.0,,,,2/2,2/2,2
+"Slow bank (5 s, 30 s)",0.9357,5016.6,,10.4,29.5,,,,0/2,2/2,2,0.9066,17.1,4.845,11.45,41.75,,,,2/2,2/2,2
+Slow DB (tables locked 30 s),0.7984,15987.5,1.02,8.9,20.5,,,,0/2,2/2,2,0.816,15365.35,1.535,7.85,20.25,,,,2/2,2/2,2
+Load spike 50/150/300 users,1.0,12.9,,,,,,,2/2,2/2,2,0.8791,9.5,,,,,,,2/2,2/2,2
+Alert test,0.964,20.1,,8.8,,,,,0/1,1/1,1,0.9926,18.4,,8.5,,,,,1/1,1/1,1
+Unauthorized access,,,,,,0.0,0.0,80.0,0/2,2/2,2,,,,8.3,,80.0,0.0,0.0,2/2,2/2,2
+Abusive requests,1.0,18.6,,,0.0,1369.5,22.0,1108.5,0/2,2/2,2,1.0,17.1,,4.35,0.0,2488.0,0.0,12.0,2/2,2/2,2
+Recovery consistency,0.8586,10003.8,25.3,36.0,not recovered,,,,0/2,2/2,2,0.9406,17.95,2.745,30.55,24.75,,,,2/2,2/2,2

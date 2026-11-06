@@ -1,0 +1,7 @@
+scenario,mode,comparable,midterm_success,endterm_success,midterm_detection_s,endterm_detection_s,endterm_alert_s,midterm_recovery_s,endterm_recovery_s,midterm_consistency,endterm_integrity
+app_crash / instance_failure,baseline,same fault (kill -9 of the payment app process),0.8622,0.8387,0.2,0.265,15.95,not recovered,not recovered,FAIL,0/2
+app_crash / instance_failure,ft,same fault (kill -9 of the payment app process),0.9994,1.0,0.24,0.11,4.85,0.0,0.0,PASS,2/2
+network_timeout / dependency_timeout,baseline,same fault (mock-bank 5 s delay for 30 s),0.9539,0.9357,,,10.4,28.5,29.5,FAIL,0/2
+network_timeout / dependency_timeout,ft,same fault (mock-bank 5 s delay for 30 s),0.92,0.9066,3.71,4.845,11.45,41.0,41.75,PASS,2/2
+lost_transaction / recovery_consistency,baseline,partly: endterm adds a kill -9 during in-flight payments,0.9278,0.8586,,25.3,36.0,28.5,not recovered,FAIL,0/2
+lost_transaction / recovery_consistency,ft,partly: endterm adds a kill -9 during in-flight payments,0.9278,0.9406,2.16,2.745,30.55,33.0,24.75,PASS,2/2

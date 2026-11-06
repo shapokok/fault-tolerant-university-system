@@ -839,3 +839,47 @@ python3 experiments/e5.py --plan                 # runs and estimated time
 python3 experiments/e5.py --only unauthorized_access --reps 1     # one short experiment, both modes
 python3 experiments/e5_report.py && open results/endterm/experiments.md
 ```
+
+## Stage E6: Analysis and comparison
+
+### What was built
+| Part | File | Content |
+|---|---|---|
+| Analysis | `analysis/endterm.py` | Reads the E5 results and the midterm results, writes the tables, `analysis.md` and all plots. Every number comes from the files |
+| Prometheus export | `analysis/prometheus_export.py` | One representative endterm session (about 5.5 min: normal load, bank error, 401/403 flood, rate limit flood); every dashboard panel exported with `query_range` (2 s step) to `results/endterm/prometheus/<panel>.csv`, events in `session_events.csv` |
+| Tables | `results/endterm/comparison.csv`, `midterm_vs_endterm.csv` | Baseline vs endterm per experiment; midterm vs endterm for the matching scenarios |
+| Report text | `results/endterm/analysis.md` | Tables plus "Discussion, limitations, and lessons learned" (the slow DB retry budget is item 1, with the proposed fix) |
+| Plots | `results/endterm/plots/` | See below. All black-and-white friendly: endterm solid black with circles, baseline dashed gray with squares, bars dark gray vs white with hatching, fault windows dotted |
+
+### Plots
+| File | Shows |
+|---|---|
+| `success_over_time.png` | Success rate in 2 s bins around the fault for 5 experiments, baseline vs endterm, fault window marked |
+| `baseline_vs_endterm.png` | Success rate and p95 latency (log scale) per experiment |
+| `load_spike.png` | Per step: success of all requests vs of requests that passed the limit; throughput |
+| `alert_timeline.png` | When each alert fired during the alert test, per segment, both modes |
+| `security_outcomes.png` | Attack requests: refused, 5xx, succeeded |
+| `midterm_vs_endterm.png` | Success rate in the 3 matching scenarios, midterm and endterm, both modes |
+| `dashboard_session.png` | The Prometheus export: requests, 5xx, 401/403/429, firing alerts over the session |
+| `architecture_endterm.png` | Architecture with Prometheus, Grafana, gateway-exporter, rate limits, auth, audit log, least-privilege DB role |
+
+### Main results to present
+- Endterm keeps the midterm fault tolerance (matching scenarios within a few percentage points) and adds alerts:
+  every fault in E5 was also seen as an alert, in 4 to 16 s.
+- Security: 80 of 80 unauthorized attempts refused (baseline: all succeeded); 0 of 2500 abusive requests answered 5xx
+  (baseline: 22); normal users unaffected in both.
+- The two places where endterm is not better are explained and measured: the slow bank (breaker trades availability
+  for correct money) and the slow DB (retry budget longer than the caller's timeout, proposed fix in `analysis.md`).
+
+### Grafana screenshots (all taken already, none needed in E6)
+| # | Stage | Moment |
+|---|---|---|
+| 1 | E2 | Normal load (retaken after the bucket and Alert history fixes) |
+| 2 | E2 | kill -9: InstanceRestarted only |
+| 3 | E2 | docker stop: payment-service-1 DOWN, InstanceDown firing |
+| 4 | E2 | Instance back, InstanceDown resolved |
+| 5 | E2 | Bank error: error rate, breaker 2, HighErrorRate, CircuitBreakerOpen |
+| 6 | E2 | Bank delay: HighLatencyP95 (p95 overstated by the old buckets, see E2) |
+| 7 | E3 | 401/403 flood: AuthFailureSpike, auth failures by reason |
+| 8 | E3 | Rate limit flood: 429, RateLimitSpike |
+| 9 | E5 | Load spike at 300 users: payments capped at about 20/s, 429, RateLimitSpike, 0 5xx |
