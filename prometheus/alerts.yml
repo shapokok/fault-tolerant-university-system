@@ -43,7 +43,7 @@ groups:
           response: "Check the dependency (bank or student-service)."
 
       - alert: AuthFailureSpike
-        expr: sum(increase(http_requests_total{status=~"401|403"}[1m])) > 20
+        expr: sum(increase(http_requests_total{source="user",status=~"401|403"}[1m])) > 20
         labels: {severity: warning}
         annotations:
           summary: "More than 20 auth failures per minute"

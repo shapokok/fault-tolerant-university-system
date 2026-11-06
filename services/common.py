@@ -11,6 +11,7 @@ from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 
 import ft
 import obs
+import security
 
 FT_MODE = os.getenv("FT_MODE", "off") == "on"
 INSTANCE = obs.INSTANCE
@@ -33,10 +34,13 @@ CONN_ERRORS = (
 pools = {}
 
 
-def http_client():
+def http_client(auth=None):
     # FT: explicit timeout on every outgoing call. Baseline: httpx default (5 s).
     # Both: forward the correlation ID.
+    # auth: an Authorization header to pass on (only to our own services, never to the bank).
     headers = obs.outgoing_headers()
+    if auth:
+        headers["Authorization"] = auth
     return httpx.AsyncClient(timeout=ft.HTTP_TIMEOUT_S, headers=headers) if FT_MODE else httpx.AsyncClient(headers=headers)
 
 
@@ -152,6 +156,7 @@ def create_app(name, use_db=True, deps=None, breakers=()):
 
     for error in CONN_ERRORS:
         app.add_exception_handler(error, db_down)
+    security.install(app)
 
     @app.get("/health")
     async def health():

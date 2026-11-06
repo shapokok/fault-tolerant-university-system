@@ -5,6 +5,7 @@ Usage: python workload.py --rate 20 --duration 30 --out /results/raw/smoke.csv
 import argparse
 import asyncio
 import csv
+import os
 import random
 import statistics
 import time
@@ -16,8 +17,12 @@ MIX = {"timetable": 40, "student": 20, "payment": 20, "registration": 10, "trans
 N_STUDENTS, N_COURSES = 50, 10
 RESEND_SHARE = 0.1  # share of payments that deliberately reuse an old idempotency key
 
+SECURITY = os.getenv("SECURITY_MODE", "off") == "on"  # endterm: log in, send a token
+TOKEN_REFRESH_S = 14 * 60  # tokens live 15 min
+
 rows = []
-sent_keys = []
+sent_keys = []  # (key, student_id): a client resends a payment for the same student
+tokens = {}     # student_id -> (token, time issued)
 
 
 def build_request(kind):
@@ -32,15 +37,45 @@ def build_request(kind):
         return "POST", "/registrations", {"student_id": sid, "course_id": random.randint(1, N_COURSES)}, {}, ""
     # payment
     if sent_keys and random.random() < RESEND_SHARE:
-        key, resent = random.choice(sent_keys), "1"
+        (key, sid), resent = random.choice(sent_keys), "1"
     else:
         key, resent = str(uuid.uuid4()), "0"
-        sent_keys.append(key)
+        sent_keys.append((key, sid))
     return "POST", "/payments", {"student_id": sid, "amount": 100}, {"Idempotency-Key": key}, resent
+
+
+async def login(client, sid):
+    """Log in as student<sid>. 429 (rate limit), 5xx (login needs the primary DB) or no answer:
+    wait and try again. 401/403/422 mean a wrong setup: stop."""
+    for _ in range(60):
+        try:
+            r = await client.post("/auth/login", json={"username": f"student{sid}", "password": os.environ["STUDENT_PASSWORD"]})
+        except httpx.HTTPError:
+            await asyncio.sleep(1)
+            continue
+        if r.status_code == 200:
+            tokens[sid] = (r.json()["access_token"], time.time())
+            return
+        if r.status_code in (401, 403, 422):
+            raise SystemExit(f"login failed for student{sid}: {r.status_code} {r.text}")
+        await asyncio.sleep(1)
+    raise SystemExit(f"login for student{sid} failed 60 times")
+
+
+async def login_all(client):
+    """Before the timed load: one token per student, about 4 logins/s (limit 5/s)."""
+    for sid in range(1, N_STUDENTS + 1):
+        await login(client, sid)
+        await asyncio.sleep(0.15)
 
 
 async def one_request(client, kind):
     method, path, body, headers, resent = build_request(kind)
+    if SECURITY:
+        sid = int(path.rsplit("/", 1)[1]) if body is None else body["student_id"]
+        if time.time() - tokens[sid][1] > TOKEN_REFRESH_S:
+            await login(client, sid)  # not timed: the request below is
+        headers = {**headers, "Authorization": "Bearer " + tokens[sid][0]}
     start = time.time()
     try:
         r = await client.request(method, path, json=body, headers=headers)
@@ -62,6 +97,8 @@ async def run(base_url, rate, duration):
     kinds, weights = list(MIX), list(MIX.values())
     tasks = []
     async with httpx.AsyncClient(base_url=base_url, timeout=10) as client:
+        if SECURITY:
+            await login_all(client)
         start = next_t = time.time()
         print(f"workload started {start:.3f}", flush=True)
         while time.time() - start < duration:

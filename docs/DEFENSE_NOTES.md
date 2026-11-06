@@ -616,3 +616,112 @@ response stays the original result (still 502), but `payment.replay()` adds `X-R
 Check (`results/endterm/e2_replay_check.txt`): bank error for 30 s, then 100 s healthy. HighErrorRate fired during
 the fault and resolved, with no new firing afterwards. In the last 60 s: 0 user 5xx, 9 replayed 502 out of 26 replays
 (before the fix these would have been 3.7% of payment requests, close to the 5% threshold).
+
+## Stage E3: Security
+
+Active only in the endterm stack (`SECURITY_MODE=on` in `docker-compose.ft.yml`). The baseline keeps the
+midterm behavior: no login, no rate limits, no audit, hard-coded DB password ("before" picture).
+
+### What was built
+| Part | File, function | How it works |
+|---|---|---|
+| Login | `security.login()`, route `POST /auth/login` in `student.py` | Looks the user up, checks the password with bcrypt (in a thread, so other requests are not blocked), returns a JWT (HS256, 15 min). Unknown user and wrong password get the same answer; unknown users are checked against a dummy hash so both take about as long |
+| Lockout | `security.login()`, columns `users.failed_logins`, `locked_until` | 5 failures in a row lock the account for 60 s (one UPDATE, safe with two instances). While locked, even the right password gets 401 "too many failed logins" |
+| Token check | `security.current_user()` (FastAPI dependency on every business endpoint) | `Authorization: Bearer <token>`; signature, `exp`, `sub`, `role` required; the algorithm is fixed to HS256, so `alg: none` is refused |
+| Authorization | `security.check_student()`, `security.check_admin()` | Students read and write only their own data. Admin and services may read any student. Writes (pay, register) only for the student, not even the admin. Batch transcripts and reconciliation: admin only |
+| Token passing | `transcript.build_transcript()`, `common.http_client(auth=...)` | transcript-service passes the user's token on to student-service. The batch job uses its own short service token (`security.service_auth()`, role `service`, 60 s). Tokens are never sent to the bank |
+| Input validation | `StrictPaymentIn`, `StrictRegistration`, `LoginIn`; `Path(ge, le)`; header `KEY`; `security.install()` | Exact types, ids in the seeded range (students 1 to 50, courses 1 to 10), amount 1 to 1,000,000 with 2 decimals, Idempotency-Key at most 64 safe characters, unknown fields refused: 422. DB value errors map to 422, never 500. Gateway body limit 16 KB: 413 |
+| Rate limits | `gateway/nginx.ft.conf` | `limit_req` per client IP: login 5/s (burst 10), payments 20/s (burst 40), `nodelay`, JSON 429 answer |
+| 429 counter | `services/gateway_exporter.py`, `access_log ... if=$rate_limited` | nginx writes each 429 as a JSON line to a shared volume; the exporter follows the file and exposes `rate_limited_total{route}`; Prometheus job `gateway` |
+| Secrets | `.env` (git-ignored), `.env.example`, `docker-compose.ft.yml` | JWT secret and all passwords come from `.env`. Replication, backup and Grafana passwords too (`db/init/00_replication.sh`, `infra/replica-entrypoint.sh`) |
+| Audit log | table `audit_log` (`db/init/03_security.sh`), `security.audit()` | Row + JSON log line for login success and failure, lockout, every 401/403, payment create, admin actions (batch, reconcile). The JSON line is the record if the DB is down |
+| Least privilege in the DB | role `uni_app` (`db/init/03_security.sh`) | Services connect as `uni_app`: only the SELECT/INSERT/UPDATE each table needs. Not the owner, so no DROP or ALTER. No TRUNCATE or DELETE anywhere. `audit_log`: INSERT only, so append-only and not even readable by the app |
+| Idempotency, abuse | `payment.check_same_student()` | Midterm idempotency keys reused. New: a key that belongs to another student's payment gets 409 (replaying it would have shown that payment) |
+| Header hygiene | `gateway/nginx.ft.conf` | Gateway removes `X-Probe` (a client cannot hide its traffic from the alerts) and sets `X-Real-IP` (audit source IP) |
+| Threat model | `docs/threat_model.md` | STRIDE table: threat, asset, scenario, control, how it is tested; known limitations |
+| Proof | `experiments/security_check.py` | 89 checks against the running stack, see below |
+
+Clients that had to learn to log in:
+- `experiments/workload.py`: logs in all 50 students before the timed load (about 11 s, paced under the login
+  limit), sends each request with the token of its student, renews tokens after 14 min, resends a payment key
+  only for the same student, and retries a login on 429, 5xx or no answer.
+- `experiments/locustfile.py`: each simulated user logs in as one student and retries on 429.
+- `experiments/auth.py` (reads `.env`), used by `run_all.py` (readiness, admin batch call), `consistency_check.py`
+  (reconciliation needs an admin token), `trace_request.sh`, `demo.sh`, `security_check.py`, `attack.py`.
+
+Two changes to earlier stages, caused by E3:
+- transcript-service's `/ready` checks student-service through the gateway route `/health/student-service`
+  instead of `/students/1`, which now needs a login. So the "student-service (probes)" line in the Requests
+  panel is gone: the probe no longer calls a business endpoint.
+- AuthFailureSpike counts only `source="user"`.
+
+### Decisions to be able to defend
+- **The 429 counter lives at the gateway** (proposal above): nginx sends the 429 itself, so the number has to come
+  from nginx. Rejected requests never reach a service.
+- **Login sits in student-service** (it owns the students), no extra service.
+- **Writes are owner-only, even for the admin**: least privilege; the admin manages, it does not pay.
+- **Lockout answers 401**, counted as `auth_failures_total{reason="locked"}`, so it feeds AuthFailureSpike.
+- **Login fails closed when the primary DB is down** (503): the failed-login counter cannot be written on the
+  read-only replica. Found by the regression demo (see below).
+
+### Proof (real runs, 2026-11-06)
+`results/endterm/e3_security_check.txt`: **89 of 89 checks passed**.
+| Section | What was shown |
+|---|---|
+| A login | right password 200, wrong 401, unknown user gets exactly the same answer |
+| B allowed | own record, own transcript (token passed on), own payment, admin reads, admin batch job done with 50 transcripts via the service token |
+| C tokens | no token, other secret, forged admin, expired, `alg: none`, garbage: all 401 |
+| D authorization | another student's record, timetable, transcript, payment, registration: 403; another student's payment key: 409; admin endpoints as a student: 403; admin paying for a student: 403; `/admin/*`, `/admin/fault`, `/metrics` through the gateway: 404; mock-bank port on 127.0.0.1 only |
+| E validation | 20 bad inputs (amount 0, too big, negative, 3 decimals, text; id as text, out of range, 2^63; extra and missing fields; SQL-like key and username; 200-character key; 5000-character password; malformed JSON): all 422, none 5xx. 20 KB body: 413 |
+| F integrity | md5 of all payments and grades identical before and after every refused attempt |
+| G lockout | 5 wrong passwords, then the right one: 401 "too many failed logins"; after 61 s: 200 |
+| H rate limits | 40 logins at once: 11 x 200, 29 x 429. 120 payment reads at once: 41 x 200, 79 x 429. `rate_limited_total` went up by exactly the 108 that the client saw |
+| I audit log | rows for login success, bad password, unknown user, locked, lockout, missing/invalid/expired token, forbidden, payment create, batch start; rows carry request_id and source IP |
+| J DB privileges | as `uni_app`: DROP, TRUNCATE, ALTER, DELETE (payments, audit_log), UPDATE audit_log and reading audit_log all refused; normal read works |
+| K secrets | none of the 7 `.env` values and none of the issued tokens in 2177 log lines; `.env` ignored and not tracked by git; no `.env` value in the service image files or image settings |
+| L metrics | `auth_failures_total` counted for all 7 reasons |
+
+Two mistakes in my own check script, fixed before the final run: a tuple compared as "one of" instead of "equal",
+and a 2-minute counter window that also caught the 429s of the previous run (213 instead of 107). The final
+check compares the counter just before and just after the burst.
+
+Other runs:
+- Workload with login, 30 s (`results/endterm/raw/e3_smoke_ft.csv`): 600/600 OK, p95 18.6 ms (E1: 16.9 ms);
+  the 13 resent keys all got 200. Logging in 50 students takes about 11 s before the timed load starts.
+- `trace_request.sh`, `check_observability.py ft`, `consistency_check.py ft`: all pass with tokens.
+- **Regression found a real problem.** The first `demo.sh ft all` stopped in db_failure: the demo injected the fault
+  10 s after starting the workload process, while the workload was still logging in. A login writes the
+  failed-login counter, the primary was down, so the login got 503 and the workload stopped. Fixes: `demo.sh`
+  waits for "workload started"; the workload retries a login on 429, 5xx or no answer. Decision kept: login fails
+  closed while the primary is down (see `docs/threat_model.md`).
+- Rerun (`results/endterm/e3_regression_demo.txt`): FT app_crash 900/900, `restarts=1`, PASS; FT db_failure
+  reads 200, writes 503, 80.1%, PASS; FT lost_transaction breaker open, 8 pending reconciled, PASS; baseline
+  app_crash `restarts=0`, FAIL (as expected).
+- Baseline unchanged, fresh stack: other students' data without a token 200, no login route (404), payment for
+  student 9999 gives 500 (no validation, midterm behavior), workload 400/400, no security tables.
+
+### Grafana screenshots (endterm, 2026-11-06, 22:31 to 22:43)
+Attacks were held until each screenshot was taken (illustration; measured numbers are in the check above).
+Alert states: `results/endterm/alerts_screenshots_e3_ft.csv`; attack counts in `results/endterm/raw/screenshots_e3_attack_*.txt`.
+
+| # | Moment | What it shows |
+|---|---|---|
+| 7 | `attack.py unauthorized` from 22:32:54 (about 2/s: no token, student1 reading student 2) | 401 and 403 about 55 to 60 per minute each, auth failures by reason `missing_token` and `forbidden`, AuthFailureSpike firing (about 8 s after the start), error rate 0 (client errors are not server errors). Resolved 49 s after the attack stopped |
+| 8 | `attack.py ratelimit` from about 22:37:32 (about 40 payment reads/s, limit 20/s) | 429 about 1100 per minute (6172 of 12422 requests refused), RateLimitSpike firing (about 6 s after the start), error rate 0, 401/403 back to 0. Resolved 50 s after the flood stopped (seen in Prometheus; the alert recorder had already been stopped) |
+
+`rate_limited_total` was also defined in every service (always 0, because nginx answers the 429). Removed after
+the session; only gateway-exporter exposes it now.
+
+### How to demo
+```bash
+docker compose -f docker-compose.ft.yml up -d --build      # needs .env (cp .env.example .env, fill in values)
+python3 experiments/security_check.py                      # 89 checks, about 2.5 min
+curl -s localhost:8080/students/1                          # 401, no token
+TOKEN=$(cd experiments && python3 -c "import auth; print(auth.student_token(1))")
+curl -s -H "Authorization: Bearer $TOKEN" localhost:8080/students/1    # 200, own record
+curl -s -H "Authorization: Bearer $TOKEN" localhost:8080/students/2    # 403, another student
+python3 experiments/attack.py unauthorized --seconds 90    # AuthFailureSpike, 401/403 panel
+python3 experiments/attack.py ratelimit --seconds 90       # RateLimitSpike, 429 line
+docker compose -f docker-compose.ft.yml exec postgres-primary psql -U uni -d uni \
+  -c "SELECT ts, user_id, action, result, source_ip FROM audit_log ORDER BY id DESC LIMIT 10;"
+```

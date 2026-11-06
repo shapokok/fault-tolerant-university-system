@@ -20,9 +20,14 @@ start_stack() {
   docker compose -f docker-compose.baseline.yml down -v >/dev/null 2>&1
   docker compose -f docker-compose.ft.yml down -v >/dev/null 2>&1
   MONITOR_FILE=${RUN}_monitor.csv $COMPOSE up -d --build >/dev/null 2>&1
-  until curl -sf $G/students/1 >/dev/null && curl -sf $G/transcripts/1 >/dev/null; do sleep 1; done
+  until curl -s -o /dev/null -w '%{http_code}' $G/students/1 | grep -qE '200|401'; do sleep 1; done
   sleep 8
   $COMPOSE ps --format '   {{.Service}}: {{.Status}}'
+  AUTH=()
+  if [ "$MODE" = ft ]; then  # endterm stack: requests need a login token (student1)
+    TOKEN=$(cd experiments && python3 -c "import auth; print(auth.student_token(1))")
+    AUTH=(-H "Authorization: Bearer $TOKEN")
+  fi
 }
 
 monitor_since() {  # monitor state changes after time $1
@@ -38,6 +43,8 @@ run_scenario() {
   $COMPOSE run --rm -T workload python /exp/workload.py --duration 45 \
     --out /results/raw/${RUN}_${sc}.csv > results/raw/${RUN}_${sc}_summary.txt 2>&1 &
   local wl=$!
+  # Endterm: the workload first logs in 50 students (about 11 s). Count 10 s from the start of the load.
+  until grep -q "workload started" results/raw/${RUN}_${sc}_summary.txt 2>/dev/null; do sleep 0.5; done
   sleep 10
   local t; t=$(python3 -c 'import time; print(f"{time.time():.3f}")')
   python3 experiments/inject.py "$sc" "$MODE" > /dev/null &
@@ -50,11 +57,11 @@ run_scenario() {
       docker inspect -f '   payment container: {{.State.Status}}, restarts={{.RestartCount}}' \
         "$( [ "$MODE" = ft ] && echo uni-ft-payment-service-1-1 || echo uni-baseline-payment-service-1 )" ;;
     db_failure)
-      curl -s -o /dev/null -w "   read  GET /timetable/1     -> %{http_code}\n" $G/timetable/1
-      curl -s -o /dev/null -w "   write POST /registrations  -> %{http_code}\n" -X POST $G/registrations \
+      curl -s -o /dev/null -w "   read  GET /timetable/1     -> %{http_code}\n" ${AUTH[@]+"${AUTH[@]}"} $G/timetable/1
+      curl -s -o /dev/null -w "   write POST /registrations  -> %{http_code}\n" ${AUTH[@]+"${AUTH[@]}"} -X POST $G/registrations \
         -H 'content-type: application/json' -d '{"student_id":1,"course_id":2}' ;;
     lost_transaction)
-      curl -s -o /dev/null -w "   POST /payments -> %{http_code}\n" -X POST $G/payments \
+      curl -s -o /dev/null -w "   POST /payments -> %{http_code}\n" ${AUTH[@]+"${AUTH[@]}"} -X POST $G/payments \
         -H 'content-type: application/json' -H "Idempotency-Key: demo-$RUN" -d '{"student_id":1,"amount":100}' ;;
   esac
 

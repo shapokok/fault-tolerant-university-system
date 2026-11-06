@@ -5,17 +5,21 @@
 set -uo pipefail
 cd "$(dirname "$0")/.."
 
+AUTH=()
 if docker ps --format '{{.Names}}' | grep -q '^uni-ft-gateway'; then
   FILE=docker-compose.ft.yml
   TRANSCRIPT="transcript-service-1 transcript-service-2"
   STUDENT="student-service-1 student-service-2"
+  # Endterm: log in as the student whose transcript we read.
+  TOKEN=$(cd experiments && python3 -c "import auth; print(auth.student_token(${1:-1}))") || exit 1
+  AUTH=(-H "Authorization: Bearer $TOKEN")
 else
   FILE=docker-compose.baseline.yml
   TRANSCRIPT="transcript-service"
   STUDENT="student-service"
 fi
 
-ID=$(curl -s -D - -o /dev/null "http://localhost:8080/transcripts/${1:-1}" \
+ID=$(curl -s -D - -o /dev/null ${AUTH[@]+"${AUTH[@]}"} "http://localhost:8080/transcripts/${1:-1}" \
      | awk 'tolower($1) == "x-request-id:" { print $2 }' | tr -d '\r')
 if [ -z "$ID" ]; then echo "FAIL: no X-Request-ID in the response"; exit 1; fi
 echo "request_id: $ID ($FILE)"

@@ -7,6 +7,7 @@ x-service: &service
   labels: {node: b}  # baseline = one server node; node_failure stops all of it
   environment:
     FT_MODE: "off"
+    SECURITY_MODE: "off"  # midterm baseline: no login, no rate limits, no audit
     DATABASE_URL: postgresql://uni:uni@postgres-primary:5432/uni
   depends_on:
     postgres-primary:

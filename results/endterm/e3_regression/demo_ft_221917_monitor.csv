@@ -1,0 +1,54 @@
+ts,target,state,detail
+1793985562.649,student-1,down,ConnectError
+1793985562.649,student-2,down,ConnectError
+1793985562.649,transcript-1,down,ConnectError
+1793985562.649,transcript-2,down,ConnectError
+1793985562.649,payment-1,down,ConnectError
+1793985562.649,payment-2,down,ConnectError
+1793985562.649,mock-bank,up,
+1793985565.658,transcript-1,degraded,student-service down
+1793985565.658,transcript-2,degraded,student-service down
+1793985566.16,student-1,up,
+1793985566.16,student-2,up,
+1793985566.16,payment-1,up,
+1793985566.16,payment-2,up,
+1793985569.179,transcript-1,up,
+1793985569.179,transcript-2,up,
+1793985587.291,payment-1,down,ConnectError
+1793985587.792,payment-1,up,
+1793985633.999,student-1,down,ConnectError
+1793985633.999,student-2,down,ConnectTimeout
+1793985633.999,transcript-1,down,ConnectError
+1793985633.999,transcript-2,down,ConnectError
+1793985633.999,payment-1,down,ConnectTimeout
+1793985633.999,payment-2,down,ConnectError
+1793985633.999,mock-bank,down,ConnectError
+1793985638.897,student-1,down,ConnectError
+1793985638.897,student-2,down,ConnectError
+1793985638.897,transcript-1,down,ConnectError
+1793985638.897,transcript-2,down,ConnectError
+1793985638.897,payment-1,down,ConnectError
+1793985638.897,payment-2,down,ConnectError
+1793985638.897,mock-bank,down,ConnectError
+1793985639.398,mock-bank,up,
+1793985641.901,student-1,up,
+1793985641.901,transcript-1,degraded,student-service down
+1793985641.901,payment-2,up,
+1793985642.407,student-2,up,
+1793985642.407,transcript-2,degraded,student-service down
+1793985642.407,payment-1,up,
+1793985645.438,transcript-1,up,
+1793985645.438,transcript-2,up,
+1793985664.557,student-1,degraded,ready ReadTimeout
+1793985664.557,student-2,degraded,ready ReadTimeout
+1793985664.557,transcript-1,degraded,ready ReadTimeout
+1793985664.557,transcript-2,degraded,ready ReadTimeout
+1793985664.557,payment-1,degraded,ready ReadTimeout
+1793985664.557,payment-2,degraded,ready ReadTimeout
+1793985694.771,student-1,down,ConnectTimeout
+1793985694.771,student-2,down,ConnectError
+1793985694.771,transcript-1,down,ConnectError
+1793985694.771,transcript-2,down,ConnectError
+1793985694.771,payment-1,down,ConnectError
+1793985694.771,payment-2,down,ConnectError
+1793985694.771,mock-bank,down,ConnectError

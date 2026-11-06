@@ -33,7 +33,7 @@ def get_json(url):
 
 def check_targets(mode):
     targets = get_json("http://localhost:9090/api/v1/targets")["data"]["activeTargets"]
-    up = {t["labels"]["instance"] for t in targets if t["health"] == "up"}
+    up = {t["labels"]["instance"] for t in targets if t["health"] == "up" and t["labels"].get("job") == "services"}
     missing = set(SERVICES[mode]) - up
     report(not missing, f"Prometheus targets up: {len(up)}/{len(SERVICES[mode])} {sorted(missing) or ''}")
 

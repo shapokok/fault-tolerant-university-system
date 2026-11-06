@@ -1,0 +1,11 @@
+ Container uni-ft-workload-run-35461abd30d7 Creating 
+ Container uni-ft-workload-run-35461abd30d7 Created 
+workload started 1793985994.486
+wrote 900 rows to /results/raw/demo_ft_222330_lost_transaction.csv
+endpoint        total    ok %   p50 ms   p95 ms
+timetable         341   100.0      3.5      6.3
+student           181   100.0      3.3      6.1
+payment           177    33.3      8.1     19.4
+registration      106   100.0      4.8      7.5
+transcript         95   100.0     14.1     19.6
+ALL               900    86.9      5.0     16.6

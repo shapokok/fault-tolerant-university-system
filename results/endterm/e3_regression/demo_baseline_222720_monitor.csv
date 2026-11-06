@@ -1,0 +1,13 @@
+ts,target,state,detail
+1793986045.128,student,down,ConnectError
+1793986045.128,transcript,down,ConnectError
+1793986045.128,payment,down,ConnectError
+1793986045.128,mock-bank,down,ConnectError
+1793986045.629,mock-bank,up,
+1793986048.139,student,up,
+1793986048.139,transcript,up,
+1793986048.139,payment,up,
+1793986068.253,payment,down,ConnectError
+1793986164.271,mock-bank,down,ConnectError
+1793986164.778,student,down,ConnectError
+1793986164.778,transcript,down,ConnectError

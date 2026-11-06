@@ -9,6 +9,7 @@ import urllib.request
 from collections import Counter
 from decimal import Decimal
 
+import auth
 from inject import ROOT, container
 
 
@@ -21,9 +22,13 @@ def psql(mode, query):
 
 def reconcile(mode):
     """FT only: resolve pending payments now instead of waiting for the background job."""
-    code = "import httpx; print(httpx.post('http://localhost:8000/admin/reconcile', timeout=60).text)"
+    # Endterm: an admin token (login through the gateway). /admin/* is not routed through the
+    # gateway, so the call is made inside the container.
+    token = auth.admin_token() if auth.secure(mode) else ""
+    code = ("import httpx, os; print(httpx.post('http://localhost:8000/admin/reconcile', timeout=60, "
+            "headers={'Authorization': 'Bearer ' + os.environ['TOKEN']}).text)")
     for name in ("payment-service-1", "payment-service-2"):
-        r = subprocess.run(["docker", "exec", container(mode, name), "python", "-c", code],
+        r = subprocess.run(["docker", "exec", "-e", f"TOKEN={token}", container(mode, name), "python", "-c", code],
                            capture_output=True, text=True)
         if r.returncode == 0:
             return r.stdout.strip()

@@ -5,6 +5,7 @@ FT: idempotency key, retry only when the bank surely did not debit, circuit brea
 completion in one transaction, reconciliation of payments with an unknown outcome.
 """
 import asyncio
+import json
 import logging
 import os
 import uuid
@@ -12,13 +13,14 @@ from decimal import Decimal
 
 import asyncpg
 import httpx
-from fastapi import Header, HTTPException
+from fastapi import Depends, Header, HTTPException, Path, Query, Request
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, Field, StrictInt
 
 import common
 import ft
 import obs
+import security
 
 BANK_URL = os.getenv("BANK_URL", "http://mock-bank:8000")
 RECONCILE_EVERY_S = 5
@@ -28,9 +30,21 @@ bank_breaker = ft.CircuitBreaker("mock-bank")
 app = common.create_app("payment-service", deps={"mock-bank": f"{BANK_URL}/health"}, breakers=[bank_breaker])
 
 
-class PaymentIn(BaseModel):
+class PaymentIn(BaseModel):  # baseline (midterm)
     student_id: int
     amount: Decimal
+
+
+class StrictPaymentIn(BaseModel):  # SECURITY_MODE=on: exact types and limits, no extra fields
+    model_config = ConfigDict(extra="forbid")
+    student_id: StrictInt = Field(ge=1, le=security.N_STUDENTS)
+    amount: Decimal = Field(ge=1, le=1_000_000, max_digits=9, decimal_places=2)
+
+
+PaymentBody = StrictPaymentIn if security.ON else PaymentIn
+KEY = Header(None, max_length=64, pattern=r"^[A-Za-z0-9_-]+$") if security.ON else Header(None)
+PID = Path(ge=1, le=2_147_483_647) if security.ON else Path()  # the DB column is a 32-bit integer
+MIN_AGE = Query(0, ge=0, le=86_400) if security.ON else 0
 
 
 async def charge(key, amount):
@@ -71,15 +85,36 @@ def replay(row):
     return JSONResponse(body, status_code=code, headers={"X-Replayed": "1"})
 
 
-@app.post("/payments", status_code=201)
-async def create_payment(p: PaymentIn, idempotency_key: str | None = Header(None)):
-    key = idempotency_key or str(uuid.uuid4())
-    if not common.FT_MODE:
-        return await baseline_payment(p, key)
+def outcome(response):
+    body = response if isinstance(response, dict) else json.loads(response.body)
+    return ("replayed " if body.get("replayed") else "") + body["status"]
 
+
+@app.post("/payments", status_code=201)
+async def create_payment(request: Request, p: PaymentBody, idempotency_key: str | None = KEY,
+                         user=Depends(security.current_user)):
+    await security.check_student(request, user, p.student_id, write=True)
+    key = idempotency_key or str(uuid.uuid4())
+    try:
+        response = await (ft_payment(p, key) if common.FT_MODE else baseline_payment(p, key))
+    except HTTPException as e:
+        await security.audit(request, "payment_create", f"student {p.student_id}", f"failed ({e.status_code})")
+        raise
+    await security.audit(request, "payment_create", f"student {p.student_id}", outcome(response))
+    return response
+
+
+def check_same_student(row, p):
+    """A key that belongs to another student's payment is refused: replaying it would show their payment."""
+    if security.ON and row["student_id"] != p.student_id:
+        raise HTTPException(409, "idempotency key already used for another payment")
+
+
+async def ft_payment(p, key):
     # 1. Duplicate request detection (UNIQUE index on idempotency_key).
     existing = await common.fetchrow("SELECT * FROM payments WHERE idempotency_key = $1", key)
     if existing:
+        check_same_student(existing, p)
         return replay(existing)
     pid = await common.fetchval(
         "INSERT INTO payments (student_id, amount, status, idempotency_key) VALUES ($1, $2, 'pending', $3) "
@@ -87,7 +122,9 @@ async def create_payment(p: PaymentIn, idempotency_key: str | None = Header(None
         p.student_id, p.amount, key,
     )
     if pid is None:  # the same key arrived at the same moment on another request
-        return replay(await common.fetchrow("SELECT * FROM payments WHERE idempotency_key = $1", key))
+        existing = await common.fetchrow("SELECT * FROM payments WHERE idempotency_key = $1", key)
+        check_same_student(existing, p)
+        return replay(existing)
 
     # 2. Charge: circuit breaker around retry with backoff.
     try:
@@ -131,10 +168,11 @@ async def baseline_payment(p, key):
 
 
 @app.get("/payments/{pid}")
-async def get_payment(pid: int):
+async def get_payment(request: Request, pid: int = PID, user=Depends(security.current_user)):
     row = await common.fetchrow("SELECT * FROM payments WHERE id = $1", pid)
     if not row:
         raise HTTPException(404, "payment not found")
+    await security.check_student(request, user, row["student_id"])
     return dict(row)
 
 
@@ -174,10 +212,13 @@ async def reconcile_loop():
 
 
 @app.post("/admin/reconcile")
-async def reconcile_now(min_age_s: float = 0):
+async def reconcile_now(request: Request, min_age_s: float = MIN_AGE, user=Depends(security.current_user)):
     if not common.FT_MODE:
         raise HTTPException(404, "no reconciliation in baseline")
-    return await reconcile(min_age_s)
+    await security.check_admin(request, user)
+    fixed = await reconcile(min_age_s)
+    await security.audit(request, "reconcile", "payments", f"completed {fixed['completed']}, failed {fixed['failed']}")
+    return fixed
 
 
 @app.on_event("startup")
@@ -188,5 +229,7 @@ async def ft_startup():
         await common.execute(
             "CREATE UNIQUE INDEX IF NOT EXISTS payments_idempotency_key ON payments (idempotency_key)")
     except asyncpg.PostgresError:
-        pass  # the other instance created it at the same moment
+        # The other instance created it at the same moment, or (SECURITY_MODE=on) the app role
+        # may not change the schema: then db/init/03_security.sh has created the index.
+        pass
     asyncio.create_task(reconcile_loop())

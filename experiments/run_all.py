@@ -13,6 +13,7 @@ import subprocess
 import time
 import urllib.request
 
+import auth
 import consistency_check
 import measure
 from inject import ROOT, SCENARIOS, inject
@@ -30,8 +31,9 @@ def compose(mode, *args, monitor_file=None):
                           cwd=ROOT, env=env, check=True, capture_output=True, text=True)
 
 
-def http(method, path):
-    req = urllib.request.Request(f"http://localhost:8080{path}", method=method)
+def http(method, path, token=None):
+    req = urllib.request.Request(f"http://localhost:8080{path}", method=method,
+                                 headers={"Authorization": f"Bearer {token}"} if token else {})
     try:
         return urllib.request.urlopen(req, timeout=5).status
     except Exception:
@@ -45,9 +47,15 @@ def start_stack(mode, monitor_file):
     if os.path.exists(path):
         os.remove(path)
     compose(mode, "up", "-d", "--build", monitor_file=monitor_file)
-    streak = 0
+    streak, token = 0, None
     for _ in range(120):
-        ok = all(http("GET", p) == 200 for p in ("/students/1", "/timetable/1", "/transcripts/1"))
+        if auth.secure(mode) and token is None:  # endterm: every call needs a login
+            try:
+                token = auth.student_token(1)
+            except Exception:
+                time.sleep(1)
+                continue
+        ok = all(http("GET", p, token) == 200 for p in ("/students/1", "/timetable/1", "/transcripts/1"))
         streak = streak + 1 if ok else 0
         if streak >= 3:
             break
@@ -80,7 +88,7 @@ def run_one(scenario, mode):
     start_stack(mode, f"raw/{run_id}_monitor.csv")
     p, t0 = start_workload(mode, RUN_S, f"/results/raw/{run_id}.csv")
     sleep_until(t0 + BATCH_AT)
-    http("POST", "/transcripts/batch")
+    http("POST", "/transcripts/batch", auth.admin_token() if auth.secure(mode) else None)
     sleep_until(t0 + INJECT_AT)
     t_inject = time.time()
     fault = inject(scenario, mode, run_id)

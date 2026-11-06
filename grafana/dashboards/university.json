@@ -2,7 +2,7 @@
   "uid": "university",
   "title": "University platform",
   "schemaVersion": 39,
-  "version": 4,
+  "version": 5,
   "editable": false,
   "refresh": "5s",
   "time": {
@@ -276,7 +276,7 @@
     },
     {
       "id": 7,
-      "title": "401 / 403 / 429 (per minute, from stage E3)",
+      "title": "401 / 403 / 429 per minute",
       "type": "timeseries",
       "datasource": {
         "type": "prometheus",
@@ -301,7 +301,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum by (status) (increase(http_requests_total{status=~\"401|403\"}[1m]))",
+          "expr": "sum by (status) (increase(http_requests_total{source=\"user\",status=~\"401|403\"}[1m]))",
           "legendFormat": "{{status}}"
         },
         {
@@ -311,7 +311,7 @@
             "uid": "prometheus"
           },
           "expr": "sum(increase(rate_limited_total[1m]))",
-          "legendFormat": "429"
+          "legendFormat": "429 (rate limited at the gateway)"
         }
       ]
     },
@@ -324,9 +324,9 @@
         "uid": "prometheus"
       },
       "gridPos": {
-        "x": 12,
+        "x": 20,
         "y": 24,
-        "w": 12,
+        "w": 4,
         "h": 8
       },
       "fieldConfig": {
@@ -415,6 +415,38 @@
           },
           "expr": "vector(0) unless on() count(ALERTS{alertstate=\"firing\"})",
           "legendFormat": "no alerts firing"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "title": "Auth failures by reason (per minute)",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 24,
+        "w": 8,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "min": 0
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum by (reason) (increase(auth_failures_total[1m])) > 0",
+          "legendFormat": "{{reason}}"
         }
       ]
     }

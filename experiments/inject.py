@@ -53,8 +53,10 @@ def node_b_containers(mode):
 
 
 def run_locust(mode, run_id):
+    import auth  # here: auth imports this module
+    login_env = ["-e", "SECURITY_MODE=on", "-e", f"STUDENT_PASSWORD={auth.env('STUDENT_PASSWORD')}"] if auth.secure(mode) else []
     subprocess.run([
-        "docker", "run", "--rm", "--network", f"{PROJECT[mode]}_default",
+        "docker", "run", "--rm", "--network", f"{PROJECT[mode]}_default", *login_env,
         "-v", f"{ROOT}/experiments:/mnt/exp:ro", "-v", f"{ROOT}/results/raw:/mnt/out",
         "locustio/locust", "-f", "/mnt/exp/locustfile.py", "--headless",
         "-u", "200", "-r", "50", "-t", "60s", "--host", "http://gateway",

@@ -24,3 +24,12 @@ scrape_configs:
         regex: "([^:]+):[0-9]+"
         target_label: instance
         replacement: "$1"
+
+  - job_name: gateway  # rate_limited_total: 429s that nginx sends itself (stage E3)
+    static_configs:
+      - targets: [gateway-exporter:8000]
+    relabel_configs:
+      - source_labels: [__address__]
+        regex: "([^:]+):[0-9]+"
+        target_label: instance
+        replacement: "$1"

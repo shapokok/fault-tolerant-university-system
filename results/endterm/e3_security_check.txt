@@ -1,0 +1,105 @@
+Stage E3 security check, 2026-11-06 22:18:12, endterm stack
+
+[A login]
+  PASS  student1, right password expected 200, got 200
+  PASS  student1, wrong password expected 401, got 401
+  PASS  unknown user gets the same answer as a wrong password
+[B allowed]
+  PASS  student1 reads own record expected 200, got 200
+  PASS  student1 reads own transcript (token passed on to student-service) expected 200, got 200
+  PASS  student1 pays for self expected 201, got 201
+  PASS  student2 pays for self expected 201, got 201
+  PASS  admin reads student 2 expected 200, got 200
+  PASS  admin starts batch transcripts expected 202, got 202
+  PASS  batch job done with 50 transcripts (service token to student-service) expected done/50, got done/50
+[C tokens]
+  PASS  no token expected 401, got 401
+  PASS  token signed with another secret expected 401, got 401
+  PASS  forged admin token (another secret) expected 401, got 401
+  PASS  expired token (right secret) expected 401, got 401
+  PASS  alg=none token expected 401, got 401
+  PASS  garbage token expected 401, got 401
+[D authorization]
+  PASS  student1 reads student 2 expected 403, got 403
+  PASS  student1 reads timetable of 2 expected 403, got 403
+  PASS  student1 reads transcript of 2 expected 403, got 403
+  PASS  student1 pays for student 2 expected 403, got 403
+  PASS  student1 registers student 2 expected 403, got 403
+  PASS  student1 reuses student 2's payment key expected 409, got 409
+  PASS  student1 starts batch transcripts (admin only) expected 403, got 403
+  PASS  student1 reads batch status (admin only) expected 403, got 403
+  PASS  admin pays for student 2 (writes: owner only) expected 403, got 403
+  PASS  /admin/reconcile through the gateway (not routed) expected 404, got 404
+  PASS  mock-bank /admin/fault through the gateway (not routed) expected 404, got 404
+  PASS  /metrics through the gateway (not routed) expected 404, got 404
+  PASS  mock-bank port bound to localhost only
+[E validation (422, never 5xx)]
+  PASS  amount 0 expected 422, got 422
+  PASS  amount 1 000 001 expected 422, got 422
+  PASS  amount negative expected 422, got 422
+  PASS  amount 3 decimals expected 422, got 422
+  PASS  amount text expected 422, got 422
+  PASS  student_id as text expected 422, got 422
+  PASS  student_id out of range expected 422, got 422
+  PASS  student_id 2^63 expected 422, got 422
+  PASS  extra field expected 422, got 422
+  PASS  missing amount expected 422, got 422
+  PASS  key with SQL expected 422, got 422
+  PASS  key 200 characters expected 422, got 422
+  PASS  course_id out of range expected 422, got 422
+  PASS  path id text expected 422, got 422
+  PASS  path id 0 expected 422, got 422
+  PASS  payment id above int32 expected 422, got 422
+  PASS  login username with SQL expected 422, got 422
+  PASS  login password 5000 characters expected 422, got 422
+  PASS  malformed JSON expected 422, got 422
+  PASS  body of 20 KB (nginx limit 16 KB) expected 413, got 413
+[F integrity]
+  PASS  payments and grades unchanged by all attempts above expected 7ff893599ce5fe8cefc05b69bc510dc6 / 2023c204845450573a27c3f409cbe2ec, got 7ff893599ce5fe8cefc05b69bc510dc6 / 2023c204845450573a27c3f409cbe2ec
+[G lockout]
+  PASS  right password after 5 failures is refused expected 401, got 401
+  PASS  message says locked
+  PASS  right password after 61 s expected 200, got 200
+[H rate limits]
+  PASS  40 logins at once: 200 11, 429 29
+  PASS  120 payment reads at once: 200 41, 429 79
+  PASS  rate_limited_total went up by the 429s the client saw expected 108, got 108
+[I audit log]
+  PASS  row for login / success
+  PASS  row for login / denied: bad_password
+  PASS  row for login / denied: unknown_user
+  PASS  row for login / denied: locked
+  PASS  row for lockout / locked for 60 s
+  PASS  row for access / denied: missing_token
+  PASS  row for access / denied: invalid_token
+  PASS  row for access / denied: expired_token
+  PASS  row for access / denied: forbidden
+  PASS  row for payment_create / completed
+  PASS  row for batch_transcripts / started
+  PASS  rows carry request_id and source_ip expected t, got t
+[J DB privileges of uni_app]
+  PASS  DROP TABLE refused
+  PASS  TRUNCATE refused
+  PASS  ALTER TABLE refused
+  PASS  DELETE payments refused
+  PASS  DELETE audit_log refused
+  PASS  UPDATE audit_log refused
+  PASS  read audit_log refused
+  PASS  normal read works expected 50, got 50
+[K secrets]
+  PASS  no .env value in 3394 log lines expected 0, got 0
+  PASS  no issued token in the logs expected 0, got 0
+  PASS  .env is ignored by git expected .env, got .env
+  PASS  .env is not tracked expected , got 
+  PASS  no .env value in the service image (/app) expected 0, got 0
+  PASS  no .env value in the image settings expected 0, got 0
+[L metrics]
+  PASS  auth_failures_total{reason=missing_token} > 0
+  PASS  auth_failures_total{reason=invalid_token} > 0
+  PASS  auth_failures_total{reason=expired_token} > 0
+  PASS  auth_failures_total{reason=forbidden} > 0
+  PASS  auth_failures_total{reason=bad_password} > 0
+  PASS  auth_failures_total{reason=unknown_user} > 0
+  PASS  auth_failures_total{reason=locked} > 0
+
+89 of 89 checks passed

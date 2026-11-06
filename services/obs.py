@@ -33,8 +33,9 @@ HTTP_DURATION = Histogram("http_request_duration_seconds", "HTTP request duratio
 BREAKER_STATE = Gauge("circuit_breaker_state", "0 closed, 1 half_open, 2 open", ["service", "target"])
 PAYMENTS = Counter("payments_total", "Payment events (a reconciled payment counts as pending, then completed)",
                    ["status"])
-AUTH_FAILURES = Counter("auth_failures_total", "Failed authentications (used from stage E3)", ["reason"])
-RATE_LIMITED = Counter("rate_limited_total", "Rate limited requests (used from stage E3)")
+AUTH_FAILURES = Counter("auth_failures_total", "Refused requests: failed login, bad or missing token, forbidden", ["reason"])
+# rate_limited_total is not here: nginx answers 429 itself, so services never see those requests.
+# services/gateway_exporter.py counts them at the gateway.
 
 BREAKER_VALUES = {"closed": 0, "half_open": 1, "open": 2}
 
