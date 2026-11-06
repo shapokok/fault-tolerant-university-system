@@ -725,3 +725,62 @@ python3 experiments/attack.py ratelimit --seconds 90       # RateLimitSpike, 429
 docker compose -f docker-compose.ft.yml exec postgres-primary psql -U uni -d uni \
   -c "SELECT ts, user_id, action, result, source_ip FROM audit_log ORDER BY id DESC LIMIT 10;"
 ```
+
+## Stage E4: Automated tests
+
+### What was built
+| Part | File | How it works |
+|---|---|---|
+| One command | `run_tests.sh` | Unit tests in a container, then a fresh endterm stack, then the integration tests on this machine. `--keep` uses the running stack instead |
+| Unit tests (75) | `tests/unit/` | Run inside `tests/Dockerfile` (Python 3.11 + the service libraries + pytest). They import the service modules directly; no network, no database |
+| Integration tests (18) | `tests/integration/test_endterm.py` | Run on this machine with pytest from `.venv-tests` (inside the project, git-ignored) against the running endterm stack. They reuse `experiments/auth.py`, `security_check.py` helpers, `inject.bank_fault` and `consistency_check.check` |
+| Acceptance criteria | docstring of each test, `tests/conftest.py` | The docstring is stored in the JUnit file as property `criterion` |
+| Reports | `tests/report.py` | Merges both JUnit files into `results/endterm/tests_junit.xml`, writes `results/endterm/tests_summary.txt` and regenerates `docs/test_plan.md` (test, criterion, result of the last run) |
+
+Unit tests:
+- `test_retry.py`: recovery after transient errors, 3 attempts maximum, no retry for permanent errors, backoff
+  0.1-0.2 s then 0.2-0.4 s, retries counted for `X-Attempts`, which errors count as transient.
+- `test_circuit_breaker.py`: opens after the threshold, rejects without calling, failures must be in a row,
+  half_open success closes and failure reopens, only one trial at a time, `circuit_breaker_state` metric. A fake
+  clock replaces `time.time`, so no test waits 10 s.
+- `test_security.py`: token round trip and 15 min lifetime; missing, expired, other-secret, `alg: none` and
+  role-less tokens refused; every refusal counted and audited; service token; the read/write rules for
+  students, admin and services; admin-only endpoints.
+- `test_validation.py`: the strict models are used in SECURITY_MODE=on; 15 payment, 5 registration and 8 login cases.
+- `test_config.py`: parses `nginx.ft.conf`: zones 5 r/s and 20 r/s per IP, burst 10 and 40 with `nodelay`, status 429,
+  429 log for the exporter, `X-Probe` removed, `X-Real-IP` set, 16 KB body limit, no route for `/admin` or `/metrics`,
+  no `limit_req` in the baseline; exporter route names.
+
+Integration tests: no token 401 (6 endpoints), other student's data 403, admin endpoints 403, 6 invalid
+payments 422, idempotent payment (one DB row, one bank charge), audit rows for a refusal and for a payment,
+`X-Real-IP` and `X-Probe` spoofing, bad `X-Request-ID` replaced, no secret or token in any log, consistency after
+bank `crash_after_debit` (reconciled, nothing pending), burst of 120 requests gets 429 counted exactly by
+`rate_limited_total`.
+
+### What the tests found (real, not planned)
+- **A client could hide its requests from the gateway log.** Since E2 the gateway skipped logging requests with
+  `X-Probe: 1`, and it read that header from the client. Metrics were right (the header is removed before the
+  services), but the gateway log missed those requests. `test_x_probe_cannot_hide_traffic` failed on its first run.
+  Fix in `gateway/observability.conf`: the gateway decides by path (`/health/student-service`, its own
+  health route), never by a client header. The test passes now.
+- **A test depended on the one before it.** `test_burst_gets_429` created a payment right after the bank crash
+  test had opened the payment breaker, so it got 503 in the full run but passed alone. It now reads an existing
+  payment. Three full runs in a row passed after the fix.
+- `gateway_exporter.py` started its endless loop on import; it now runs only as a program, so its route function
+  can be tested.
+
+### Result (2026-11-06)
+`./run_tests.sh`: **93 of 93 passed** (unit 75, integration 18). Files: `results/endterm/tests_junit.xml`,
+`results/endterm/tests_summary.txt`, `docs/test_plan.md`.
+
+### Limits
+- Not automated here: the 60 s lockout (in `security_check.py`, section G) and the full fault scenarios (E5).
+- The integration tests run against one fresh stack; a test that changes shared state (the bank crash) can
+  affect the next one, as seen above. Each test now prepares what it needs.
+
+### How to demo
+```bash
+./run_tests.sh                     # about 1.5 min, prints the summary
+cat results/endterm/tests_summary.txt
+open docs/test_plan.md             # every test, its criterion and the last result
+```

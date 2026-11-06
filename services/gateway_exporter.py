@@ -41,4 +41,5 @@ def main():
             line = ""
 
 
-main()
+if __name__ == "__main__":
+    main()

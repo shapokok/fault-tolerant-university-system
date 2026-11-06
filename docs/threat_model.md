@@ -6,14 +6,15 @@ controls on purpose; it is the "before" picture.
 Assets: student records and grades, payments and the ledger, user accounts, the audit log, secrets (.env).
 
 "Tested by" letters refer to sections of `experiments/security_check.py`; the latest result is
-`results/endterm/e3_security_check.txt` (89 of 89 checks passed, 2026-11-06).
+`results/endterm/e3_security_check.txt` (89 of 89 checks passed, 2026-11-06). Names starting with `test_` are
+automated tests (`./run_tests.sh`, plan and last results in `docs/test_plan.md`).
 
 | # | STRIDE | Asset | Threat scenario | Control | Tested by |
 |---|---|---|---|---|---|
 | 1 | Spoofing | Student account | Attacker guesses a password by trying many | bcrypt hashes (cost 10); lockout after 5 failures for 60 s; login rate limit 5/s per IP (burst 10); AuthFailureSpike alert | G (lockout), H (rate limit) |
 | 2 | Spoofing | Student account | Attacker finds valid usernames from the error message | Same answer for an unknown user and a wrong password; a dummy bcrypt check for unknown users, so both take about as long | A (same answer). Timing not measured |
 | 3 | Spoofing | API identity | Forged token, token with `alg: none`, expired token | HS256 signature checked with the secret from .env; algorithm fixed in the code; `exp` required; 15 min lifetime | C |
-| 4 | Spoofing | Metrics, audit log | Client sends `X-Probe: 1` to hide its traffic from the alerts, or a fake `X-Real-IP` to fake the audit IP | Gateway removes `X-Probe` and overwrites `X-Real-IP` on every request | Planned in E4 (integration test) |
+| 4 | Spoofing | Metrics, audit log | Client sends `X-Probe: 1` to hide its traffic from the alerts, or a fake `X-Real-IP` to fake the audit IP | Gateway removes `X-Probe` and overwrites `X-Real-IP` on every request; the gateway decides what not to log by path, not by a client header | E4: `test_x_probe_cannot_hide_traffic`, `test_x_real_ip_cannot_be_spoofed`, `test_bad_request_id_is_replaced` |
 | 5 | Tampering | Payments | Changed amount: 0, negative, huge, 3 decimals, text; extra fields such as `"status": "completed"` | Strict input models: amount 1 to 1,000,000 with 2 decimals, ids in the seeded range, unknown fields refused (422); DB value errors mapped to 422 | E |
 | 6 | Tampering | Other students' data | Student pays or registers for another student | Writes allowed only for the student's own id (not even admin) | D, F (payments and grades checksum unchanged) |
 | 7 | Tampering | Schema, audit log | SQL injection or a compromised service tries DROP, ALTER, TRUNCATE, DELETE, or edits the audit log | Parameterized queries everywhere; services use `uni_app`: no DROP/ALTER (not the owner), no TRUNCATE or DELETE granted, audit_log INSERT only | J; SQL-like input refused in E |
