@@ -1,0 +1,93 @@
+30 of 30 runs to do, about 87 min
+
+=== instance_failure_kill_ft_r1  23:37:28
+{'total': 1500, 'success_rate': 1.0, 'p95_ms': 15.9, 'detection_s': 0.11, 'alert_detection_s': 5.3, 'recovery_s': 0.0, 'attacks_total': None, 'attacks_blocked': None, 'attacks_5xx': None, 'alerts_fired': 'InstanceRestarted', 'alerts_ok': True, 'integrity': 'PASS', 'valid': True, 'invalid_reason': ''}
+
+=== instance_failure_kill_baseline_r1  23:39:15
+{'total': 1500, 'success_rate': 0.8447, 'p95_ms': 10003.2, 'detection_s': 0.42, 'alert_detection_s': 15.9, 'recovery_s': None, 'attacks_total': None, 'attacks_blocked': None, 'attacks_5xx': None, 'alerts_fired': 'InstanceDown', 'alerts_ok': True, 'integrity': 'FAIL', 'valid': True, 'invalid_reason': ''}
+
+=== dependency_timeout_bank_ft_r1  23:40:49
+{'total': 1500, 'success_rate': 0.908, 'p95_ms': 17.1, 'detection_s': 5.14, 'alert_detection_s': 9.4, 'recovery_s': 42.5, 'attacks_total': None, 'attacks_blocked': None, 'attacks_5xx': None, 'alerts_fired': 'CircuitBreakerOpen HighErrorRate HighLatencyP95', 'alerts_ok': True, 'integrity': 'PASS', 'valid': True, 'invalid_reason': ''}
+
+=== dependency_timeout_bank_baseline_r1  23:42:36
+{'total': 1500, 'success_rate': 0.9327, 'p95_ms': 5016.3, 'detection_s': 63.93, 'alert_detection_s': 10.9, 'recovery_s': 29.5, 'attacks_total': None, 'attacks_blocked': None, 'attacks_5xx': None, 'alerts_fired': 'HighErrorRate HighLatencyP95', 'alerts_ok': True, 'integrity': 'FAIL', 'valid': True, 'invalid_reason': ''}
+
+=== dependency_timeout_db_ft_r1  23:44:09
+{'total': 1500, 'success_rate': 0.816, 'p95_ms': 15414.7, 'detection_s': 1.49, 'alert_detection_s': 8.4, 'recovery_s': 20.0, 'attacks_total': None, 'attacks_blocked': None, 'attacks_5xx': None, 'alerts_fired': 'CircuitBreakerOpen HighErrorRate HighLatencyP95', 'alerts_ok': True, 'integrity': 'PASS', 'valid': True, 'invalid_reason': ''}
+
+=== dependency_timeout_db_baseline_r1  23:45:57
+{'total': 1500, 'success_rate': 0.7987, 'p95_ms': 16105.6, 'detection_s': 1.01, 'alert_detection_s': 9.9, 'recovery_s': 20.5, 'attacks_total': None, 'attacks_blocked': None, 'attacks_5xx': None, 'alerts_fired': 'HighErrorRate HighLatencyP95', 'alerts_ok': True, 'integrity': 'FAIL', 'valid': True, 'invalid_reason': ''}
+
+=== load_spike_50150300_ft_r1  23:47:30
+{'total': 29912, 'success_rate': 0.8795, 'p95_ms': 9.4, 'detection_s': None, 'alert_detection_s': None, 'recovery_s': None, 'attacks_total': None, 'attacks_blocked': None, 'attacks_5xx': None, 'alerts_fired': 'RateLimitSpike', 'alerts_ok': True, 'integrity': 'PASS', 'valid': True, 'invalid_reason': ''}
+
+=== load_spike_50150300_baseline_r1  23:50:50
+{'total': 29863, 'success_rate': 1.0, 'p95_ms': 12.6, 'detection_s': None, 'alert_detection_s': None, 'recovery_s': None, 'attacks_total': None, 'attacks_blocked': None, 'attacks_5xx': None, 'alerts_fired': '', 'alerts_ok': True, 'integrity': 'PASS', 'valid': True, 'invalid_reason': ''}
+
+=== alert_test_all_ft_r1  23:54:08
+{'total': 17900, 'success_rate': 0.9926, 'p95_ms': 18.4, 'detection_s': None, 'alert_detection_s': 8.5, 'recovery_s': None, 'attacks_total': None, 'attacks_blocked': None, 'attacks_5xx': None, 'alerts_fired': 'AuthFailureSpike CircuitBreakerOpen HighErrorRate HighLatencyP95 InstanceDown InstanceRestarted RateLimitSpike', 'alerts_ok': True, 'integrity': 'PASS', 'valid': True, 'invalid_reason': ''}
+
+=== alert_test_all_baseline_r1  00:09:33
+{'total': 13901, 'success_rate': 0.964, 'p95_ms': 20.1, 'detection_s': None, 'alert_detection_s': 8.8, 'recovery_s': None, 'attacks_total': None, 'attacks_blocked': None, 'attacks_5xx': None, 'alerts_fired': 'HighErrorRate HighLatencyP95 InstanceDown InstanceRestarted', 'alerts_ok': True, 'integrity': 'FAIL', 'valid': True, 'invalid_reason': ''}
+
+=== unauthorized_access_8_ft_r1  00:21:25
+{'total': None, 'success_rate': None, 'p95_ms': None, 'detection_s': None, 'alert_detection_s': 7.8, 'recovery_s': None, 'attacks_total': 80, 'attacks_blocked': 80, 'attacks_5xx': 0, 'alerts_fired': 'AuthFailureSpike', 'alerts_ok': True, 'integrity': 'PASS', 'valid': True, 'invalid_reason': ''}
+
+=== unauthorized_access_8_baseline_r1  00:22:15
+{'total': None, 'success_rate': None, 'p95_ms': None, 'detection_s': None, 'alert_detection_s': None, 'recovery_s': None, 'attacks_total': 80, 'attacks_blocked': 0, 'attacks_5xx': 0, 'alerts_fired': '', 'alerts_ok': True, 'integrity': 'FAIL', 'valid': True, 'invalid_reason': ''}
+
+=== abusive_requests_fuzz_ft_r1  00:23:00
+{'total': 1500, 'success_rate': 1.0, 'p95_ms': 17.5, 'detection_s': None, 'alert_detection_s': 6.4, 'recovery_s': 0.0, 'attacks_total': 2500, 'attacks_blocked': 2488, 'attacks_5xx': 0, 'alerts_fired': 'RateLimitSpike', 'alerts_ok': True, 'integrity': 'PASS', 'valid': True, 'invalid_reason': ''}
+
+=== abusive_requests_fuzz_baseline_r1  00:24:48
+{'total': 1500, 'success_rate': 1.0, 'p95_ms': 18.4, 'detection_s': None, 'alert_detection_s': None, 'recovery_s': 0.0, 'attacks_total': 2500, 'attacks_blocked': 1375, 'attacks_5xx': 19, 'alerts_fired': '', 'alerts_ok': True, 'integrity': 'FAIL', 'valid': True, 'invalid_reason': ''}
+
+=== recovery_consistency_crash_ft_r1  00:26:22
+{'total': 1500, 'success_rate': 0.9393, 'p95_ms': 18.1, 'detection_s': 3.42, 'alert_detection_s': 30.6, 'recovery_s': 25.5, 'attacks_total': None, 'attacks_blocked': None, 'attacks_5xx': None, 'alerts_fired': 'CircuitBreakerOpen HighErrorRate HighLatencyP95 InstanceRestarted', 'alerts_ok': True, 'integrity': 'PASS', 'valid': True, 'invalid_reason': ''}
+
+=== recovery_consistency_crash_baseline_r1  00:28:10
+{'total': 1500, 'success_rate': 0.8633, 'p95_ms': 10003.7, 'detection_s': 25.07, 'alert_detection_s': 36.0, 'recovery_s': None, 'attacks_total': None, 'attacks_blocked': None, 'attacks_5xx': None, 'alerts_fired': 'HighErrorRate HighLatencyP95 InstanceDown', 'alerts_ok': True, 'integrity': 'FAIL', 'valid': True, 'invalid_reason': ''}
+
+=== instance_failure_kill_ft_r2  00:29:53
+{'total': 1500, 'success_rate': 1.0, 'p95_ms': 16.8, 'detection_s': 0.11, 'alert_detection_s': 4.4, 'recovery_s': 0.0, 'attacks_total': None, 'attacks_blocked': None, 'attacks_5xx': None, 'alerts_fired': 'InstanceRestarted', 'alerts_ok': True, 'integrity': 'PASS', 'valid': True, 'invalid_reason': ''}
+
+=== instance_failure_kill_baseline_r2  00:31:40
+{'total': 1500, 'success_rate': 0.8327, 'p95_ms': 10004.1, 'detection_s': 0.11, 'alert_detection_s': 16.0, 'recovery_s': None, 'attacks_total': None, 'attacks_blocked': None, 'attacks_5xx': None, 'alerts_fired': 'InstanceDown', 'alerts_ok': True, 'integrity': 'FAIL', 'valid': True, 'invalid_reason': ''}
+
+=== dependency_timeout_bank_ft_r2  00:33:14
+{'total': 1500, 'success_rate': 0.9053, 'p95_ms': 17.1, 'detection_s': 4.55, 'alert_detection_s': 13.5, 'recovery_s': 41.0, 'attacks_total': None, 'attacks_blocked': None, 'attacks_5xx': None, 'alerts_fired': 'CircuitBreakerOpen HighErrorRate HighLatencyP95', 'alerts_ok': True, 'integrity': 'PASS', 'valid': True, 'invalid_reason': ''}
+
+=== dependency_timeout_bank_baseline_r2  00:35:01
+{'total': 1500, 'success_rate': 0.9387, 'p95_ms': 5016.9, 'detection_s': 64.05, 'alert_detection_s': 9.9, 'recovery_s': 29.5, 'attacks_total': None, 'attacks_blocked': None, 'attacks_5xx': None, 'alerts_fired': 'HighErrorRate HighLatencyP95', 'alerts_ok': True, 'integrity': 'FAIL', 'valid': True, 'invalid_reason': ''}
+
+=== dependency_timeout_db_ft_r2  00:36:35
+{'total': 1500, 'success_rate': 0.816, 'p95_ms': 15316.0, 'detection_s': 1.58, 'alert_detection_s': 7.3, 'recovery_s': 20.5, 'attacks_total': None, 'attacks_blocked': None, 'attacks_5xx': None, 'alerts_fired': 'CircuitBreakerOpen HighErrorRate HighLatencyP95', 'alerts_ok': True, 'integrity': 'PASS', 'valid': True, 'invalid_reason': ''}
+
+=== dependency_timeout_db_baseline_r2  00:38:23
+{'total': 1500, 'success_rate': 0.798, 'p95_ms': 15869.4, 'detection_s': 1.03, 'alert_detection_s': 7.9, 'recovery_s': 20.5, 'attacks_total': None, 'attacks_blocked': None, 'attacks_5xx': None, 'alerts_fired': 'HighErrorRate HighLatencyP95', 'alerts_ok': True, 'integrity': 'FAIL', 'valid': True, 'invalid_reason': ''}
+
+=== load_spike_50150300_ft_r2  00:39:57
+{'total': 29876, 'success_rate': 0.8787, 'p95_ms': 9.6, 'detection_s': None, 'alert_detection_s': None, 'recovery_s': None, 'attacks_total': None, 'attacks_blocked': None, 'attacks_5xx': None, 'alerts_fired': 'RateLimitSpike', 'alerts_ok': True, 'integrity': 'PASS', 'valid': True, 'invalid_reason': ''}
+
+=== load_spike_50150300_baseline_r2  00:43:17
+{'total': 29817, 'success_rate': 1.0, 'p95_ms': 13.2, 'detection_s': None, 'alert_detection_s': None, 'recovery_s': None, 'attacks_total': None, 'attacks_blocked': None, 'attacks_5xx': None, 'alerts_fired': '', 'alerts_ok': True, 'integrity': 'PASS', 'valid': True, 'invalid_reason': ''}
+
+=== unauthorized_access_8_ft_r2  00:46:34
+{'total': None, 'success_rate': None, 'p95_ms': None, 'detection_s': None, 'alert_detection_s': 8.8, 'recovery_s': None, 'attacks_total': 80, 'attacks_blocked': 80, 'attacks_5xx': 0, 'alerts_fired': 'AuthFailureSpike', 'alerts_ok': True, 'integrity': 'PASS', 'valid': True, 'invalid_reason': ''}
+
+=== unauthorized_access_8_baseline_r2  00:47:23
+{'total': None, 'success_rate': None, 'p95_ms': None, 'detection_s': None, 'alert_detection_s': None, 'recovery_s': None, 'attacks_total': 80, 'attacks_blocked': 0, 'attacks_5xx': 0, 'alerts_fired': '', 'alerts_ok': True, 'integrity': 'FAIL', 'valid': True, 'invalid_reason': ''}
+
+=== abusive_requests_fuzz_ft_r2  00:48:09
+{'total': 1500, 'success_rate': 1.0, 'p95_ms': 16.7, 'detection_s': None, 'alert_detection_s': 2.3, 'recovery_s': 0.0, 'attacks_total': 2500, 'attacks_blocked': 2488, 'attacks_5xx': 0, 'alerts_fired': 'RateLimitSpike', 'alerts_ok': True, 'integrity': 'PASS', 'valid': True, 'invalid_reason': ''}
+
+=== abusive_requests_fuzz_baseline_r2  00:49:58
+{'total': 1500, 'success_rate': 1.0, 'p95_ms': 18.8, 'detection_s': None, 'alert_detection_s': None, 'recovery_s': 0.0, 'attacks_total': 2500, 'attacks_blocked': 1364, 'attacks_5xx': 25, 'alerts_fired': '', 'alerts_ok': True, 'integrity': 'FAIL', 'valid': True, 'invalid_reason': ''}
+
+=== recovery_consistency_crash_ft_r2  00:51:32
+{'total': 1500, 'success_rate': 0.942, 'p95_ms': 17.8, 'detection_s': 2.07, 'alert_detection_s': 30.5, 'recovery_s': 24.0, 'attacks_total': None, 'attacks_blocked': None, 'attacks_5xx': None, 'alerts_fired': 'CircuitBreakerOpen HighErrorRate HighLatencyP95 InstanceRestarted', 'alerts_ok': True, 'integrity': 'PASS', 'valid': True, 'invalid_reason': ''}
+
+=== recovery_consistency_crash_baseline_r2  00:53:19
+{'total': 1500, 'success_rate': 0.854, 'p95_ms': 10003.9, 'detection_s': 25.53, 'alert_detection_s': 36.0, 'recovery_s': None, 'attacks_total': None, 'attacks_blocked': None, 'attacks_5xx': None, 'alerts_fired': 'HighErrorRate HighLatencyP95 InstanceDown', 'alerts_ok': True, 'integrity': 'FAIL', 'valid': True, 'invalid_reason': ''}
+
+series finished 00:55:03

@@ -1,0 +1,4 @@
+ts,alertname,instance,service,target,state
+1793988583.685,HighLatencyP95,,student-service,,firing
+1793988588.718,HighLatencyP95,,transcript-service,,firing
+1793988588.718,HighLatencyP95,,payment-service,,firing

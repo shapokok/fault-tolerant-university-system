@@ -1,0 +1,15 @@
+ts,alertname,instance,service,target,state
+1793993843.501,HighLatencyP95,,student-service,,firing
+1793993848.55,HighLatencyP95,,transcript-service,,firing
+1793993853.587,HighLatencyP95,,payment-service,,firing
+1793993853.587,CircuitBreakerOpen,transcript-service-2,transcript-service,student-service,firing
+1793993853.587,CircuitBreakerOpen,transcript-service-1,transcript-service,student-service,firing
+1793993858.634,HighErrorRate,,payment-service,,firing
+1793993863.672,HighErrorRate,,transcript-service,,firing
+1793993868.719,CircuitBreakerOpen,transcript-service-2,transcript-service,student-service,resolved
+1793993868.722,CircuitBreakerOpen,transcript-service-1,transcript-service,student-service,resolved
+1793993892.939,HighErrorRate,,payment-service,,resolved
+1793993892.939,HighErrorRate,,transcript-service,,resolved
+1793993897.992,HighLatencyP95,,student-service,,resolved
+1793993897.992,HighLatencyP95,,transcript-service,,resolved
+1793993897.992,HighLatencyP95,,payment-service,,resolved

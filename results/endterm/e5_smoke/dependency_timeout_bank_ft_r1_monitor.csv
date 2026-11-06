@@ -1,0 +1,28 @@
+ts,target,state,detail
+1793988389.771,student-1,down,ConnectError
+1793988389.771,student-2,down,ConnectError
+1793988389.771,transcript-1,down,ConnectError
+1793988389.771,transcript-2,down,ConnectError
+1793988389.771,payment-1,down,ConnectError
+1793988389.771,payment-2,down,ConnectError
+1793988389.771,mock-bank,down,ConnectError
+1793988390.273,mock-bank,up,
+1793988392.786,student-2,up,
+1793988392.786,transcript-1,degraded,student-service down
+1793988392.786,transcript-2,degraded,student-service down
+1793988392.786,payment-1,up,
+1793988392.786,payment-2,up,
+1793988393.289,student-1,up,
+1793988395.804,transcript-1,up,
+1793988395.804,transcript-2,up,
+1793988430.495,payment-1,degraded,breaker mock-bank open
+1793988430.495,payment-2,degraded,breaker mock-bank open
+1793988442.552,payment-1,up,
+1793988442.552,payment-2,up,
+1793988465.663,student-1,down,ConnectError
+1793988465.663,student-2,down,ConnectTimeout
+1793988465.663,transcript-1,down,ConnectError
+1793988465.663,transcript-2,down,ConnectError
+1793988465.663,payment-1,down,ConnectError
+1793988465.663,payment-2,down,ConnectError
+1793988465.663,mock-bank,down,ConnectError

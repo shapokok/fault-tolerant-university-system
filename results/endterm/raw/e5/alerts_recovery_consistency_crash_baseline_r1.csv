@@ -1,0 +1,11 @@
+ts,alertname,instance,service,target,state
+1793993323.714,HighErrorRate,,mock-bank,,firing
+1793993323.714,HighErrorRate,,payment-service,,firing
+1793993343.832,InstanceDown,payment-service,,,pending
+1793993343.832,HighLatencyP95,,mock-bank,,firing
+1793993352.896,InstanceDown,payment-service,,,firing
+1793993352.896,HighLatencyP95,,payment-service,,firing
+1793993367.998,HighErrorRate,,mock-bank,,resolved
+1793993368.001,HighErrorRate,,payment-service,,resolved
+1793993373.04,HighLatencyP95,,mock-bank,,resolved
+1793993373.04,HighLatencyP95,,payment-service,,resolved

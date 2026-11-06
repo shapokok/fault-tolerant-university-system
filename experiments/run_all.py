@@ -60,7 +60,7 @@ def start_stack(mode, monitor_file):
         if streak >= 3:
             break
         time.sleep(1)
-    time.sleep(8)  # let every instance and the replica become healthy
+    time.sleep(4)  # let every instance and the replica become healthy
 
 
 def start_workload(mode, duration, out):

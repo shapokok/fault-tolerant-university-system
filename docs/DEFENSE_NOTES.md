@@ -784,3 +784,58 @@ bank `crash_after_debit` (reconciled, nothing pending), burst of 120 requests ge
 cat results/endterm/tests_summary.txt
 open docs/test_plan.md             # every test, its criterion and the last result
 ```
+
+## Stage E5: Experiments
+
+### How the series was run
+- `experiments/e5.py` runs everything; `experiments/e5_report.py` builds `results/endterm/summary.csv` and
+  `results/endterm/experiments.md` (hypothesis, configuration, steps, expected, observed, repetitions, limitations)
+  from the data. Raw files: `results/endterm/raw/e5/` (request logs, monitor, alerts, attacks, Locust, docker stats).
+- Every run: fresh stack (down -v, up, seed data), warm-up 15 s, alert recorder, experiment, integrity check, down.
+  One row per run is appended to `results/endterm/experiments.csv` right away; a rerun resumes.
+- Validity as in E2: INVALID if the alert recorder paused more than 3 s, the run took much longer than planned or
+  the workload sent less than 95% of its requests. **Result: 30 of 30 runs valid.**
+- Repetitions (agreed, option B): 2 per experiment and mode, `alert_test` 1 (E2 has a second, independent series).
+  Shortened only what does not change the measurement: warm-up 15 s, 75 s runs (15 s warm-up, 30 s fault,
+  30 s after), shorter waits. `alert_test` kept full fault lengths. Series: 2026-11-06 23:41 to 2026-11-07 00:55.
+- A shortened smoke run of every experiment came first (`results/endterm/e5_smoke/`, code check only, not used).
+
+### Results (means of the valid runs; full tables in `results/endterm/experiments.md`)
+| Experiment | FT (endterm) | Baseline |
+|---|---|---|
+| instance_failure (kill -9) | 100% success, recovery 0 s, InstanceRestarted after 4.9 s, integrity PASS | 83.9%, not recovered, InstanceDown after 16 s, FAIL |
+| dependency_timeout bank (5 s for 30 s) | 90.7%, p95 17 ms, breaker opens, detected 4.8 s, recovered 42 s, PASS | 93.6%, p95 5017 ms, monitor does not see it (alert does: 10 s), FAIL (money taken for failed payments) |
+| dependency_timeout db (tables locked 30 s) | 81.6%, recovered 20 s, PASS | 79.8%, recovered 20.5 s, FAIL |
+| load_spike 300 users | 84.5% of all, **100% of requests that passed the limit**, 1843 rejected by rate limit, 0 5xx, 252 ok req/s, CPU 82% | 100%, 299 ok req/s, CPU 76% |
+| alert_test | 7 of 7 rules fired as expected (3.8 to 14.5 s), 0 alerts in 5 min normal load | 4 of 4 as expected, 0 in normal load |
+| unauthorized_access | 80 of 80 refused, 80 audit rows, data unchanged, AuthFailureSpike | 80 of 80 succeeded, data changed |
+| abusive_requests | 0 of 2500 answered 5xx, normal users 100% | 22 answered 5xx, 1109 succeeded, normal users 100% |
+| recovery_consistency | 94.1%, recovered 25 s, PASS (no duplicate, lost or pending payment) | 85.9%, not recovered, FAIL |
+
+### Findings to explain (real numbers)
+- **Slow bank: FT has lower success than the baseline (90.7% vs 93.6%)**, as in the midterm: the breaker rejects
+  payments at once, while the baseline waits up to 5 s. But the baseline took money for payments it marked failed
+  (integrity FAIL in both runs); FT kept the money right. p95 17 ms vs 5017 ms.
+- **Slow DB: FT is barely better (81.6% vs 79.8%).** Every failed timetable request in FT hit the client's 10 s
+  timeout (10 004 ms). With the tables locked on primary and replica, FT tries 3 times x (primary 2 s + replica 2 s),
+  about 12 s, longer than the client waits, so the cache answer comes too late. Lesson: the retry budget must be
+  shorter than the caller's timeout (a total deadline per request). Not changed in this stage.
+- **load_spike: all load comes from one IP**, so the per-IP limit (20 payment requests/s) applies to the whole test.
+  The 429 are the protection working: every request that passed the limit succeeded (100%), with p95 8 ms.
+- **Baseline cannot detect a slow bank with the monitor** (its `/ready` does not check dependencies), but the
+  HighLatencyP95 alert, added in both modes, does (10.4 s). Observability helps the baseline too.
+- **Two measurement fixes after the series (no rerun needed, raw data unchanged):** "detection" and "instances down"
+  also counted the stack shutdown after each run (every instance "down" about 64 s after the fault). Both are now
+  computed only inside the load window, from the raw monitor logs; 2 runs changed (baseline bank: now "not
+  detected"). `e5.py` is fixed for future runs.
+
+### Screenshot (Grafana)
+`load_spike` at 300 users (2026-11-06 about 23:36, endterm, illustration run, not part of the series): payments capped
+at about 20 req/s by the limit, about 2400 x 429 per minute, RateLimitSpike firing, 0 5xx, p95 about 10 ms.
+
+### How to demo
+```bash
+python3 experiments/e5.py --plan                 # runs and estimated time
+python3 experiments/e5.py --only unauthorized_access --reps 1     # one short experiment, both modes
+python3 experiments/e5_report.py && open results/endterm/experiments.md
+```

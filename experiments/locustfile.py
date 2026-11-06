@@ -7,6 +7,7 @@ import uuid
 from locust import HttpUser, between, task
 
 SECURITY = os.getenv("SECURITY_MODE", "off") == "on"
+TOKENS = {}  # student id -> token, shared by all simulated users of that student (at most 50 logins)
 
 
 class Student(HttpUser):
@@ -17,11 +18,15 @@ class Student(HttpUser):
         self.headers = {}
         if not SECURITY:
             return
+        if self.sid in TOKENS:
+            self.headers = {"Authorization": "Bearer " + TOKENS[self.sid]}
+            return
         for _ in range(120):  # the login limit (5/s per IP) answers 429 while many users start
             r = self.client.post("/auth/login", json={"username": f"student{self.sid}", "password": os.environ["STUDENT_PASSWORD"]},
                                  name="/auth/login")
             if r.status_code == 200:
-                self.headers = {"Authorization": "Bearer " + r.json()["access_token"]}
+                TOKENS[self.sid] = r.json()["access_token"]
+                self.headers = {"Authorization": "Bearer " + TOKENS[self.sid]}
                 return
             time.sleep(1 + random.random())
 

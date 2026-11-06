@@ -1,0 +1,7 @@
+ts,alertname,instance,service,target,state
+1793990793.818,HighErrorRate,,transcript-service,,firing
+1793990793.819,HighLatencyP95,,transcript-service,,firing
+1793990818.057,HighLatencyP95,,payment-service,,firing
+1793990818.057,HighLatencyP95,,student-service,,firing
+1793990843.293,HighErrorRate,,transcript-service,,resolved
+1793990843.295,HighLatencyP95,,transcript-service,,resolved

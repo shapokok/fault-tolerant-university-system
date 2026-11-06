@@ -1,0 +1,4 @@
+ts,alertname,instance,service,target,state
+1793990593.744,HighErrorRate,,payment-service,,firing
+1793990593.744,HighLatencyP95,,payment-service,,firing
+1793990593.744,HighLatencyP95,,mock-bank,,firing

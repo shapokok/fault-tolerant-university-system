@@ -22,15 +22,16 @@ def active_alerts():
     return {tuple(sorted(a["labels"].items())): a["state"] for a in data}
 
 
-def watch(run, stop, stats=None):
+def watch(run, stop, stats=None, folder=None):
     """Runs until the threading.Event `stop` is set. Returns the rows it wrote.
     stats["max_gap_s"]: longest time between two successful polls. A large gap means the
     laptop slept or Prometheus did not answer, so the run cannot be trusted."""
-    os.makedirs(os.path.join(ROOT, "results", "endterm"), exist_ok=True)
+    folder = folder or os.path.join(ROOT, "results", "endterm")
+    os.makedirs(folder, exist_ok=True)
     rows, last = [], {}
     stats = {} if stats is None else stats
     stats["max_gap_s"], last_ok = 0.0, None
-    with open(os.path.join(ROOT, "results", "endterm", f"alerts_{run}.csv"), "w", newline="") as f:
+    with open(os.path.join(folder, f"alerts_{run}.csv"), "w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=FIELDS)
         w.writeheader()
 
@@ -63,10 +64,10 @@ def watch(run, stop, stats=None):
     return rows
 
 
-def watch_in_background(run):
+def watch_in_background(run, folder=None):
     """Returns (stop event, thread, result list, stats dict)."""
     stop, result, stats = threading.Event(), [], {}
-    t = threading.Thread(target=lambda: result.extend(watch(run, stop, stats)))
+    t = threading.Thread(target=lambda: result.extend(watch(run, stop, stats, folder)))
     t.start()
     return stop, t, result, stats
 

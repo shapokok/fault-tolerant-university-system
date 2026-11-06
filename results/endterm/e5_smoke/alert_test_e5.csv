@@ -1,0 +1,13 @@
+run_id,mode,rep,segment,expected,fired,first_expected_after_s,verdict
+alert_test_all_ft_r1,ft,1,normal load,,,,PASS
+alert_test_all_ft_r1,ft,1,kill -9 payment-service-1,InstanceRestarted,InstanceRestarted,5.3,PASS
+alert_test_all_ft_r1,ft,1,docker stop 30 s,InstanceDown,,,FAIL
+alert_test_all_ft_r1,ft,1,bank error 30 s,CircuitBreakerOpen HighErrorRate,CircuitBreakerOpen HighErrorRate,4.7,PASS
+alert_test_all_ft_r1,ft,1,bank delay 1 s for 45 s,HighLatencyP95,HighLatencyP95,5.0,PASS
+alert_test_all_ft_r1,ft,1,401/403 flood 30 s,AuthFailureSpike,,,FAIL
+alert_test_all_ft_r1,ft,1,rate limit flood 30 s,RateLimitSpike,RateLimitSpike,10.5,PASS
+alert_test_all_baseline_r1,baseline,1,normal load,,,,PASS
+alert_test_all_baseline_r1,baseline,1,bank error 30 s,HighErrorRate,HighErrorRate,10.0,PASS
+alert_test_all_baseline_r1,baseline,1,bank delay 1 s for 45 s,HighLatencyP95,HighLatencyP95,5.2,PASS
+alert_test_all_baseline_r1,baseline,1,docker stop 30 s,InstanceDown,InstanceRestarted,,FAIL
+alert_test_all_baseline_r1,baseline,1,kill -9 payment-service,InstanceDown,InstanceDown,15.8,PASS

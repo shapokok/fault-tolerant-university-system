@@ -1,0 +1,17 @@
+experiment,variant,mode,runs,success_rate_mean,success_rate_std,success_rate_passed_limit_mean,success_rate_passed_limit_std,error_rate_mean,error_rate_std,avg_ms_mean,avg_ms_std,p95_ms_mean,p95_ms_std,detection_s_mean,detection_s_std,alert_detection_s_mean,alert_detection_s_std,recovery_s_mean,recovery_s_std,attacks_total_mean,attacks_total_std,attacks_blocked_mean,attacks_blocked_std,attacks_5xx_mean,attacks_5xx_std,attacks_succeeded_mean,attacks_succeeded_std,not_recovered_runs,integrity_pass,alerts_ok,alerts_fired
+instance_failure,kill -9,ft,2,1.0,0.0,1.0,0.0,0.0,0.0,5.8,0.0,16.35,0.6364,0.11,0.0,4.85,0.6364,0.0,0.0,,,,,,,,,0,2/2,2/2,InstanceRestarted
+instance_failure,kill -9,baseline,2,0.8387,0.0085,0.8387,0.0085,0.1613,0.0085,1245.85,51.2652,10003.65,0.6364,0.265,0.2192,15.95,0.0707,,,,,,,,,,,2,0/2,2/2,InstanceDown
+dependency_timeout,bank,ft,2,0.9066,0.0019,0.9066,0.0019,0.0934,0.0019,38.3,4.5255,17.1,0.0,4.845,0.4172,11.45,2.8991,41.75,1.0607,,,,,,,,,0,2/2,2/2,CircuitBreakerOpen HighErrorRate HighLatencyP95
+dependency_timeout,bank,baseline,2,0.9357,0.0042,0.9357,0.0042,0.0643,0.0042,403.85,28.2136,5016.6,0.4243,,,10.4,0.7071,29.5,0.0,,,,,,,,,0,0/2,2/2,HighErrorRate HighLatencyP95
+dependency_timeout,db,ft,2,0.816,0.0,0.816,0.0,0.184,0.0,4062.75,11.243,15365.35,69.7914,1.535,0.0636,7.85,0.7778,20.25,0.3536,,,,,,,,,0,2/2,2/2,CircuitBreakerOpen HighErrorRate HighLatencyP95
+dependency_timeout,db,baseline,2,0.7984,0.0005,0.7984,0.0005,0.2016,0.0005,4167.5,8.6267,15987.5,167.0186,1.02,0.0141,8.9,1.4142,20.5,0.0,,,,,,,,,0,0/2,2/2,HighErrorRate HighLatencyP95
+load_spike,50-150-300 users,ft,2,0.8791,0.0006,1.0,0.0,0.0,0.0,3.05,0.0707,9.5,0.1414,,,,,,,,,,,,,,,0,2/2,2/2,RateLimitSpike
+load_spike,50-150-300 users,baseline,2,1.0,0.0,1.0,0.0,0.0,0.0,4.25,0.2121,12.9,0.4243,,,,,,,,,,,,,,,0,2/2,2/2,
+alert_test,all rules + 5 min normal,ft,1,0.9926,,0.9926,,0.0074,,17.1,,18.4,,,,8.5,,,,,,,,,,,,0,1/1,1/1,AuthFailureSpike CircuitBreakerOpen HighErrorRate HighLatencyP95 InstanceDown InstanceRestarted RateLimitSpike
+alert_test,all rules + 5 min normal,baseline,1,0.964,,0.964,,0.036,,209.6,,20.1,,,,8.8,,,,,,,,,,,,0,0/1,1/1,HighErrorRate HighLatencyP95 InstanceDown InstanceRestarted
+unauthorized_access,8 attack kinds,ft,2,,,,,,,,,,,,,8.3,0.7071,,,80.0,0.0,80.0,0.0,0.0,0.0,0.0,0.0,0,2/2,2/2,AuthFailureSpike
+unauthorized_access,8 attack kinds,baseline,2,,,,,,,,,,,,,,,,,80.0,0.0,0.0,0.0,0.0,0.0,80.0,0.0,0,0/2,2/2,
+abusive_requests,fuzz + bursts,ft,2,1.0,0.0,1.0,0.0,0.0,0.0,6.15,0.2121,17.1,0.5657,,,4.35,2.8991,0.0,0.0,2500.0,0.0,2488.0,0.0,0.0,0.0,12.0,0.0,0,2/2,2/2,RateLimitSpike
+abusive_requests,fuzz + bursts,baseline,2,1.0,0.0,1.0,0.0,0.0,0.0,8.85,0.6364,18.6,0.2828,,,,,0.0,0.0,2500.0,0.0,1369.5,7.7782,22.0,4.2426,1108.5,3.5355,0,0/2,2/2,
+recovery_consistency,crash after debit + kill,ft,2,0.9406,0.0019,0.9406,0.0019,0.0593,0.0019,46.35,0.495,17.95,0.2121,2.745,0.9546,30.55,0.0707,24.75,1.0607,,,,,,,,,0,2/2,2/2,CircuitBreakerOpen HighErrorRate HighLatencyP95 InstanceRestarted
+recovery_consistency,crash after debit + kill,baseline,2,0.8586,0.0066,0.8586,0.0066,0.1413,0.0066,910.7,2.1213,10003.8,0.1414,25.3,0.3253,36.0,0.0,,,,,,,,,,,2,0/2,2/2,HighErrorRate HighLatencyP95 InstanceDown

@@ -1,0 +1,3 @@
+ts,alertname,instance,service,target,state
+1793993533.359,InstanceDown,payment-service,,,pending
+1793993543.463,InstanceDown,payment-service,,,firing

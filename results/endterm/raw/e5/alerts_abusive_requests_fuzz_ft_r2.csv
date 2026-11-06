@@ -1,0 +1,3 @@
+ts,alertname,instance,service,target,state
+1793994533.312,RateLimitSpike,,,,firing
+1793994593.692,RateLimitSpike,,,,resolved

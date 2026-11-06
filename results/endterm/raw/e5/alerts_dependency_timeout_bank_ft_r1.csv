@@ -1,0 +1,14 @@
+ts,alertname,instance,service,target,state
+1793990498.634,HighErrorRate,,payment-service,,firing
+1793990498.634,HighLatencyP95,,payment-service,,firing
+1793990498.634,HighLatencyP95,,mock-bank,,firing
+1793990498.634,CircuitBreakerOpen,payment-service-1,payment-service,mock-bank,firing
+1793990498.634,CircuitBreakerOpen,payment-service-2,payment-service,mock-bank,firing
+1793990508.706,CircuitBreakerOpen,payment-service-1,payment-service,mock-bank,resolved
+1793990508.707,CircuitBreakerOpen,payment-service-2,payment-service,mock-bank,resolved
+1793990513.74,CircuitBreakerOpen,payment-service-1,payment-service,mock-bank,firing
+1793990513.74,CircuitBreakerOpen,payment-service-2,payment-service,mock-bank,firing
+1793990528.834,HighLatencyP95,,payment-service,,resolved
+1793990533.862,CircuitBreakerOpen,payment-service-1,payment-service,mock-bank,resolved
+1793990537.888,CircuitBreakerOpen,payment-service-2,payment-service,mock-bank,resolved
+1793990542.926,HighLatencyP95,,mock-bank,,resolved

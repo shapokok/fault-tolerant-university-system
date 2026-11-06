@@ -1,0 +1,2 @@
+ts,alertname,instance,service,target,state
+1793988193.0,InstanceRestarted,payment-service-1,,,firing
